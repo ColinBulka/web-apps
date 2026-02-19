@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Salad Calorie Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fdf6f0;
+            color: #2d3436;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header-icons {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 6px;
+            letter-spacing: 6px;
+        }
+        h1 {
+            text-align: center;
+            color: #c0392b;
+            margin-bottom: 6px;
+            font-size: 1.8rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+        }
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #fdebd0;
+            color: #c0392b;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        th:first-child { border-radius: 8px 0 0 0; }
+        th:last-child { border-radius: 0 8px 0 0; }
+        th.right, td.right { text-align: right; }
+        th.center, td.center { text-align: center; }
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0e6de;
+            font-size: 0.95rem;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #fef9f5; }
+        .fruit-name { font-weight: 500; }
+        .cal-per-100 { color: #888; }
+        .cal-result {
+            font-weight: 600;
+            color: #c0392b;
+            text-align: right;
+        }
+        .cal-result.empty { color: #ddd; }
+        td input[type="number"] {
+            width: 80px;
+            padding: 6px 8px;
+            border: 1.5px solid #e0d6ce;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            text-align: right;
+        }
+        td input[type="number"]:focus {
+            outline: none;
+            border-color: #c0392b;
+        }
+        .cal-input {
+            width: 60px;
+            padding: 4px 6px;
+            border: 1.5px solid #e0d6ce;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-align: right;
+            color: #888;
+            background: #fefefe;
+        }
+        .cal-input:focus {
+            outline: none;
+            border-color: #c0392b;
+            color: #2d3436;
+        }
+        .total-row {
+            background: #c0392b;
+            color: white;
+            border-radius: 0 0 8px 8px;
+        }
+        .total-row td {
+            padding: 14px 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-bottom: none;
+        }
+        .separator-row td {
+            padding: 4px 12px;
+            background: #f5ebe3;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .separator-row .cat-delete {
+            float: right;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+        .separator-row .cat-delete:hover { color: #e74c3c; background: #fee; }
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 24px;
+            background: #c0392b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover { background: #96281b; }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+        .delete-btn:hover { background: #fee; color: #e74c3c; }
+        .add-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .add-card h3 {
+            color: #c0392b;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        .add-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .add-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 100px;
+        }
+        .add-group label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 3px;
+        }
+        .add-group input, .add-group select {
+            padding: 8px 10px;
+            border: 1.5px solid #e0d6ce;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .add-group input:focus, .add-group select:focus {
+            outline: none;
+            border-color: #c0392b;
+        }
+        @media (max-width: 500px) {
+            body { padding: 10px; }
+            .card, .add-card { padding: 14px; }
+            th, td { padding: 6px 6px; font-size: 0.82rem; }
+            td input[type="number"] { width: 56px; font-size: 0.82rem; }
+            .cal-input { width: 50px; font-size: 0.82rem; }
+            h1 { font-size: 1.4rem; }
+            .header-icons { font-size: 1.6rem; }
+            .add-row { flex-direction: column; }
+            .add-group { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-icons">&#127815; &#127827; &#127820; &#129389; &#127817; &#127826;</div>
+        <h1>Fruit Salad Calorie Calculator</h1>
+        <p class="subtitle">Calories per 100g of edible portion (no peel, pit, or skin) &mdash; USDA data</p>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fruit</th>
+                        <th class="right">Cal/100g</th>
+                        <th class="right">Grams</th>
+                        <th class="right">Calories</th>
+                        <th class="center"></th>
+                    </tr>
+                </thead>
+                <tbody id="fruit-body"></tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="2">Total</td>
+                        <td class="right" id="total-weight">0g</td>
+                        <td class="right" id="total-calories">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="btn-row">
+                <button onclick="clearAll()">Clear Grams</button>
+            </div>
+        </div>
+
+        <div class="add-card">
+            <h3>&#43; Add New Item</h3>
+            <div class="add-row">
+                <div class="add-group" style="flex:2">
+                    <label for="add-name">Name</label>
+                    <input type="text" id="add-name" placeholder="e.g. Dates">
+                </div>
+                <div class="add-group">
+                    <label for="add-cal">Cal / 100g</label>
+                    <input type="number" id="add-cal" placeholder="e.g. 282" min="0">
+                </div>
+                <div class="add-group">
+                    <label for="add-cat">Category</label>
+                    <select id="add-cat"></select>
+                </div>
+                <button onclick="addItem()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'fsc_fruits';
+
+        const defaultFruits = [
+            { cat: 'Berries' },
+            { name: 'Strawberry', cal: 32 },
+            { name: 'Blueberry', cal: 57 },
+            { name: 'Raspberry', cal: 52 },
+            { name: 'Blackberry', cal: 43 },
+            { cat: 'Stone Fruit' },
+            { name: 'Peach', cal: 39 },
+            { name: 'Nectarine', cal: 44 },
+            { name: 'Plum', cal: 46 },
+            { name: 'Cherry', cal: 63 },
+            { name: 'Apricot', cal: 48 },
+            { cat: 'Tropical' },
+            { name: 'Banana', cal: 89 },
+            { name: 'Mango', cal: 60 },
+            { name: 'Pineapple', cal: 50 },
+            { name: 'Papaya', cal: 43 },
+            { name: 'Passion Fruit', cal: 97 },
+            { name: 'Lychee', cal: 66 },
+            { name: 'Guava', cal: 68 },
+            { name: 'Dragon Fruit', cal: 60 },
+            { name: 'Coconut (flesh)', cal: 354 },
+            { cat: 'Citrus' },
+            { name: 'Orange', cal: 47 },
+            { name: 'Grapefruit', cal: 33 },
+            { name: 'Tangerine', cal: 53 },
+            { cat: 'Melons' },
+            { name: 'Watermelon', cal: 30 },
+            { name: 'Cantaloupe', cal: 34 },
+            { name: 'Honeydew Melon', cal: 36 },
+            { cat: 'Other Fruit' },
+            { name: 'Apple', cal: 52 },
+            { name: 'Pear', cal: 57 },
+            { name: 'Grapes', cal: 69 },
+            { name: 'Kiwi', cal: 61 },
+            { name: 'Fig (fresh)', cal: 74 },
+            { name: 'Persimmon', cal: 70 },
+            { name: 'Pomegranate Seeds', cal: 83 },
+            { name: 'Starfruit', cal: 31 },
+            { cat: 'Extras' },
+            { name: 'Cottage Cheese', cal: 98 },
+        ];
+
+        let fruits = loadFruits();
+
+        function loadFruits() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultFruits));
+        }
+
+        function saveFruits() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(fruits));
+        }
+
+        function getCategories() {
+            return fruits.filter(f => f.cat).map(f => f.cat);
+        }
+
+        function buildCategoryDropdown() {
+            const sel = document.getElementById('add-cat');
+            sel.innerHTML = '';
+            getCategories().forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                sel.appendChild(opt);
+            });
+        }
+
+        function buildTable() {
+            const tbody = document.getElementById('fruit-body');
+            let html = '';
+
+            fruits.forEach((item, i) => {
+                if (item.cat) {
+                    html += '<tr class="separator-row"><td colspan="5">' + item.cat + '<button class="cat-delete" onclick="deleteCategory(' + i + ')" title="Delete category &amp; all its items">&#10005;</button></td></tr>';
+                } else {
+                    html += '<tr>' +
+                        '<td class="fruit-name">' + item.name + '</td>' +
+                        '<td class="right cal-per-100"><input type="number" class="cal-input" value="' + item.cal + '" min="0" onchange="updateCal(' + i + ', this.value)"></td>' +
+                        '<td class="right"><input type="number" id="g-' + i + '" min="0" placeholder="0" oninput="calculate()"></td>' +
+                        '<td class="cal-result empty" id="r-' + i + '">&mdash;</td>' +
+                        '<td class="center"><button class="delete-btn" onclick="deleteItem(' + i + ')" title="Delete item">&#10005;</button></td>' +
+                        '</tr>';
+                }
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function updateCal(index, value) {
+            const cal = parseInt(value);
+            if (isNaN(cal) || cal < 0) return;
+            fruits[index].cal = cal;
+            saveFruits();
+            calculate();
+        }
+
+        function deleteItem(index) {
+            const item = fruits[index];
+            if (!confirm('Remove ' + item.name + '?')) return;
+            fruits.splice(index, 1);
+            saveFruits();
+            buildTable();
+            buildCategoryDropdown();
+            calculate();
+        }
+
+        function deleteCategory(index) {
+            const cat = fruits[index].cat;
+            if (!confirm('Remove "' + cat + '" and all its items?')) return;
+            // Count how many items to remove (category header + all items until next category or end)
+            let count = 1;
+            for (let i = index + 1; i < fruits.length; i++) {
+                if (fruits[i].cat) break;
+                count++;
+            }
+            fruits.splice(index, count);
+            saveFruits();
+            buildTable();
+            buildCategoryDropdown();
+            calculate();
+        }
+
+        function addItem() {
+            const nameInput = document.getElementById('add-name');
+            const calInput = document.getElementById('add-cal');
+            const catSelect = document.getElementById('add-cat');
+
+            const name = nameInput.value.trim();
+            const cal = parseInt(calInput.value);
+            const cat = catSelect.value;
+
+            if (!name) { alert('Please enter a name.'); return; }
+            if (isNaN(cal) || cal < 0) { alert('Please enter calories per 100g.'); return; }
+
+            // Find the last item in the chosen category and insert after it
+            let insertAt = -1;
+            let inCat = false;
+            for (let i = 0; i < fruits.length; i++) {
+                if (fruits[i].cat === cat) { inCat = true; continue; }
+                if (inCat && !fruits[i].cat) { insertAt = i + 1; }
+                if (inCat && fruits[i].cat) break;
+            }
+            if (insertAt === -1) insertAt = fruits.length;
+
+            fruits.splice(insertAt, 0, { name, cal });
+            saveFruits();
+
+            nameInput.value = '';
+            calInput.value = '';
+
+            buildTable();
+            calculate();
+        }
+
+        function calculate() {
+            let totalCal = 0;
+            let totalGrams = 0;
+
+            fruits.forEach((item, i) => {
+                if (item.cat) return;
+                const input = document.getElementById('g-' + i);
+                const result = document.getElementById('r-' + i);
+                const grams = parseFloat(input.value);
+
+                if (grams > 0) {
+                    const cal = Math.round(grams * item.cal / 100);
+                    result.textContent = cal;
+                    result.className = 'cal-result';
+                    totalCal += cal;
+                    totalGrams += grams;
+                } else {
+                    result.innerHTML = '&mdash;';
+                    result.className = 'cal-result empty';
+                }
+            });
+
+            document.getElementById('total-calories').textContent = totalCal;
+            document.getElementById('total-weight').textContent = totalGrams + 'g';
+        }
+
+        function clearAll() {
+            fruits.forEach((item, i) => {
+                if (item.cat) return;
+                document.getElementById('g-' + i).value = '';
+            });
+            calculate();
+        }
+
+        buildTable();
+        buildCategoryDropdown();
+    </script>
+</body>
+</html>

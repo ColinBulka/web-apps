@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tennis Match Tracker</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f3eff8;
+    color: #1a1a2e;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 {
+    text-align: center;
+    color: #6a1b9a;
+    margin-bottom: 24px;
+    font-size: 1.8rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e0d8e8;
+  }
+  .card h2 {
+    color: #6a1b9a;
+    margin-bottom: 16px;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #ede7f6;
+    padding-bottom: 8px;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+  }
+  input[type="date"], select, input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #c8c0d6;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #faf8ff;
+  }
+  input[type="number"] { width: 70px; text-align: center; }
+  .form-row { margin-bottom: 14px; }
+  .set-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .set-row span { font-weight: 600; min-width: 48px; }
+  .set-row .vs { color: #999; font-weight: 400; }
+  .btn {
+    background: #7b1fa2;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn:hover { background: #4a148c; }
+  .btn-delete {
+    background: #c62828;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+  }
+  .btn-delete:hover { background: #b71c1c; }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .stat-box {
+    background: #ede7f6;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-box .val {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #6a1b9a;
+  }
+  .stat-box .lbl {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 2px;
+  }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  th {
+    background: #7b1fa2;
+    color: #fff;
+    padding: 8px 10px;
+    text-align: left;
+  }
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e0d8e8;
+  }
+  tr:nth-child(even) { background: #f8f5fc; }
+  .result-win { color: #2e7d32; font-weight: 700; }
+  .result-loss { color: #c62828; font-weight: 700; }
+  .result-draw { color: #e65100; font-weight: 700; }
+  .no-data { color: #999; text-align: center; padding: 20px; }
+
+  /* Chart */
+  canvas { width: 100%; height: 280px; }
+
+  @media (max-width: 500px) {
+    body { padding: 12px; }
+    h1 { font-size: 1.4rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<h1>&#127934; Tennis Match Tracker &#127934;</h1>
+
+<!-- Score Entry -->
+<div class="card">
+  <h2>&#127934; Log a Match</h2>
+  <div class="form-row">
+    <label for="matchDate">Date</label>
+    <input type="date" id="matchDate">
+  </div>
+  <div class="form-row">
+    <label for="numSets">Number of Sets</label>
+    <select id="numSets">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label>Set Scores</label>
+    <div id="setInputs"></div>
+  </div>
+  <button class="btn" onclick="saveMatch()">Save Match</button>
+</div>
+
+<!-- Statistics -->
+<div class="card">
+  <h2>Statistics</h2>
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-box"><div class="val" id="statTotal">0</div><div class="lbl">Matches</div></div>
+    <div class="stat-box"><div class="val" id="statWins">0</div><div class="lbl">Wins</div></div>
+    <div class="stat-box"><div class="val" id="statLosses">0</div><div class="lbl">Losses</div></div>
+    <div class="stat-box"><div class="val" id="statDraws">0</div><div class="lbl">Draws</div></div>
+    <div class="stat-box"><div class="val" id="statStreak">-</div><div class="lbl">Streak</div></div>
+    <div class="stat-box"><div class="val" id="statSets">0-0</div><div class="lbl">Sets W-L</div></div>
+  </div>
+</div>
+
+<!-- Chart -->
+<div class="card">
+  <h2>Cumulative Wins &amp; Losses</h2>
+  <canvas id="chart"></canvas>
+</div>
+
+<!-- Match History -->
+<div class="card">
+  <h2>&#127934; Match History</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Scores</th><th>Result</th><th></th></tr></thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+  <div class="no-data" id="noData">No matches recorded yet.</div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tennisMatches';
+
+function loadMatches() {
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+}
+function saveMatches(matches) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
+}
+
+// --- Set Inputs ---
+function renderSetInputs() {
+  const n = parseInt(document.getElementById('numSets').value);
+  const container = document.getElementById('setInputs');
+  container.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const row = document.createElement('div');
+    row.className = 'set-row';
+    row.innerHTML = `<span>Set ${i + 1}:</span>
+      <input type="number" id="colin${i}" min="0" max="99" placeholder="C">
+      <span class="vs">vs</span>
+      <input type="number" id="michael${i}" min="0" max="99" placeholder="M">`;
+    container.appendChild(row);
+  }
+}
+document.getElementById('numSets').addEventListener('change', renderSetInputs);
+
+// --- Save Match ---
+function saveMatch() {
+  const date = document.getElementById('matchDate').value;
+  if (!date) { alert('Please select a date.'); return; }
+  const n = parseInt(document.getElementById('numSets').value);
+  const sets = [];
+  for (let i = 0; i < n; i++) {
+    const c = document.getElementById('colin' + i).value;
+    const m = document.getElementById('michael' + i).value;
+    if (c === '' || m === '') { alert('Please fill in all set scores.'); return; }
+    sets.push({ colin: parseInt(c), michael: parseInt(m) });
+  }
+  const result = calcResult(sets);
+  const matches = loadMatches();
+  matches.push({ date, sets, result });
+  matches.sort((a, b) => a.date.localeCompare(b.date));
+  saveMatches(matches);
+  renderAll();
+  // Reset score inputs
+  for (let i = 0; i < n; i++) {
+    document.getElementById('colin' + i).value = '';
+    document.getElementById('michael' + i).value = '';
+  }
+}
+
+function calcResult(sets) {
+  let cWins = 0, mWins = 0;
+  for (const s of sets) {
+    if (s.colin > s.michael) cWins++;
+    else if (s.michael > s.colin) mWins++;
+  }
+  if (cWins > mWins) return 'Win';
+  if (mWins > cWins) return 'Loss';
+  return 'Draw';
+}
+
+// --- Delete ---
+function deleteMatch(idx) {
+  const matches = loadMatches();
+  matches.splice(idx, 1);
+  saveMatches(matches);
+  renderAll();
+}
+
+// --- Render History ---
+function renderHistory(matches) {
+  const tbody = document.getElementById('historyBody');
+  const noData = document.getElementById('noData');
+  tbody.innerHTML = '';
+  if (matches.length === 0) { noData.style.display = ''; return; }
+  noData.style.display = 'none';
+  matches.forEach((m, i) => {
+    const tr = document.createElement('tr');
+    const scores = m.sets.map(s => `${s.colin}-${s.michael}`).join(', ');
+    const cls = m.result === 'Win' ? 'result-win' : m.result === 'Loss' ? 'result-loss' : 'result-draw';
+    tr.innerHTML = `<td>${m.date}</td><td>${scores}</td><td class="${cls}">${m.result}</td>
+      <td><button class="btn btn-delete" onclick="deleteMatch(${i})">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// --- Render Stats ---
+function renderStats(matches) {
+  const total = matches.length;
+  const wins = matches.filter(m => m.result === 'Win').length;
+  const losses = matches.filter(m => m.result === 'Loss').length;
+  const draws = matches.filter(m => m.result === 'Draw').length;
+
+  let setsWon = 0, setsLost = 0;
+  for (const m of matches) {
+    for (const s of m.sets) {
+      if (s.colin > s.michael) setsWon++;
+      else if (s.michael > s.colin) setsLost++;
+    }
+  }
+
+  // Streak
+  let streak = '-';
+  if (total > 0) {
+    let type = matches[matches.length - 1].result;
+    let count = 0;
+    for (let i = matches.length - 1; i >= 0; i--) {
+      if (matches[i].result === type) count++;
+      else break;
+    }
+    if (type === 'Win') streak = `${count}W`;
+    else if (type === 'Loss') streak = `${count}L`;
+    else streak = `${count}D`;
+  }
+
+  const pct = (v) => total ? ` (${Math.round(v / total * 100)}%)` : '';
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statWins').textContent = wins + pct(wins);
+  document.getElementById('statLosses').textContent = losses + pct(losses);
+  document.getElementById('statDraws').textContent = draws + pct(draws);
+  document.getElementById('statStreak').textContent = streak;
+  document.getElementById('statSets').textContent = `${setsWon}-${setsLost}`;
+}
+
+// --- Render Chart ---
+function renderChart(matches) {
+  const canvas = document.getElementById('chart');
+  const ctx = canvas.getContext('2d');
+  // Set actual pixel dimensions to match CSS layout size
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.scale(2, 2);
+  const W = canvas.offsetWidth;
+  const H = canvas.offsetHeight;
+  ctx.clearRect(0, 0, W, H);
+
+  if (matches.length === 0) {
+    ctx.fillStyle = '#999';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data yet', W / 2, H / 2);
+    return;
+  }
+
+  const pad = { top: 20, right: 20, bottom: 50, left: 40 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+
+  // Compute cumulative wins/losses
+  let cumW = 0, cumL = 0;
+  const data = matches.map(m => {
+    if (m.result === 'Win') cumW++;
+    else if (m.result === 'Loss') cumL++;
+    return { date: m.date, w: cumW, l: cumL };
+  });
+
+  const maxVal = Math.max(cumW, cumL, 1);
+  const n = data.length;
+  const groupW = chartW / n;
+  const barW = Math.max(4, Math.min(24, groupW * 0.35));
+
+  // Y-axis gridlines
+  const ySteps = Math.min(maxVal, 5);
+  ctx.strokeStyle = '#e0d8e8';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#888';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= ySteps; i++) {
+    const val = Math.round(maxVal / ySteps * i);
+    const y = pad.top + chartH - (val / maxVal * chartH);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + chartW, y);
+    ctx.stroke();
+    ctx.fillText(val, pad.left - 6, y + 4);
+  }
+
+  // Bars
+  data.forEach((d, i) => {
+    const cx = pad.left + groupW * i + groupW / 2;
+    // Win bar
+    const wH = (d.w / maxVal) * chartH;
+    ctx.fillStyle = '#43a047';
+    ctx.fillRect(cx - barW - 1, pad.top + chartH - wH, barW, wH);
+    // Loss bar
+    const lH = (d.l / maxVal) * chartH;
+    ctx.fillStyle = '#e53935';
+    ctx.fillRect(cx + 1, pad.top + chartH - lH, barW, lH);
+
+    // X labels
+    ctx.fillStyle = '#555';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    const label = d.date.slice(5); // MM-DD
+    ctx.save();
+    ctx.translate(cx, pad.top + chartH + 8);
+    ctx.rotate(Math.PI / 4);
+    ctx.textAlign = 'left';
+    ctx.fillText(label, 0, 0);
+    ctx.restore();
+  });
+
+  // Legend
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#43a047';
+  ctx.fillRect(pad.left, pad.top - 14, 10, 10);
+  ctx.fillStyle = '#1a3a1a';
+  ctx.fillText('Wins', pad.left + 14, pad.top - 5);
+  ctx.fillStyle = '#e53935';
+  ctx.fillRect(pad.left + 60, pad.top - 14, 10, 10);
+  ctx.fillStyle = '#1a3a1a';
+  ctx.fillText('Losses', pad.left + 74, pad.top - 5);
+}
+
+// --- Render All ---
+function renderAll() {
+  const matches = loadMatches();
+  renderHistory(matches);
+  renderStats(matches);
+  renderChart(matches);
+}
+
+// --- Init ---
+document.getElementById('matchDate').valueAsDate = new Date();
+renderSetInputs();
+renderAll();
+window.addEventListener('resize', () => renderChart(loadMatches()));
+</script>
+</body>
+</html>

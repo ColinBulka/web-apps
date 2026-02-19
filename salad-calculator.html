@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salad Calorie Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f5ee;
+            color: #2d3436;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header-icons {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 6px;
+            letter-spacing: 6px;
+        }
+        h1 {
+            text-align: center;
+            color: #27763d;
+            margin-bottom: 6px;
+            font-size: 1.8rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+        }
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #d4edda;
+            color: #27763d;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        th:first-child { border-radius: 8px 0 0 0; }
+        th:last-child { border-radius: 0 8px 0 0; }
+        th.right, td.right { text-align: right; }
+        th.center, td.center { text-align: center; }
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e8f0e4;
+            font-size: 0.95rem;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #f6faf5; }
+        .item-name { font-weight: 500; }
+        .cal-per-100 { color: #888; }
+        .cal-result {
+            font-weight: 600;
+            color: #27763d;
+            text-align: right;
+        }
+        .cal-result.empty { color: #ddd; }
+        td input[type="number"] {
+            width: 80px;
+            padding: 6px 8px;
+            border: 1.5px solid #d0dece;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            text-align: right;
+        }
+        td input[type="number"]:focus {
+            outline: none;
+            border-color: #27763d;
+        }
+        .cal-input {
+            width: 60px;
+            padding: 4px 6px;
+            border: 1.5px solid #d0dece;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            text-align: right;
+            color: #888;
+            background: #fefefe;
+        }
+        .cal-input:focus {
+            outline: none;
+            border-color: #27763d;
+            color: #2d3436;
+        }
+        .total-row {
+            background: #27763d;
+            color: white;
+            border-radius: 0 0 8px 8px;
+        }
+        .total-row td {
+            padding: 14px 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-bottom: none;
+        }
+        .separator-row td {
+            padding: 4px 12px;
+            background: #e8f0e4;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .separator-row .cat-delete {
+            float: right;
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+        .separator-row .cat-delete:hover { color: #e74c3c; background: #fee; }
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 24px;
+            background: #27763d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover { background: #1b5a2c; }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+        .delete-btn:hover { background: #fee; color: #e74c3c; }
+        .add-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .add-card h3 {
+            color: #27763d;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        .add-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .add-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 100px;
+        }
+        .add-group label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 3px;
+        }
+        .add-group input, .add-group select {
+            padding: 8px 10px;
+            border: 1.5px solid #d0dece;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .add-group input:focus, .add-group select:focus {
+            outline: none;
+            border-color: #27763d;
+        }
+        @media (max-width: 500px) {
+            body { padding: 10px; }
+            .card, .add-card { padding: 14px; }
+            th, td { padding: 6px 6px; font-size: 0.82rem; }
+            td input[type="number"] { width: 56px; font-size: 0.82rem; }
+            .cal-input { width: 50px; font-size: 0.82rem; }
+            h1 { font-size: 1.4rem; }
+            .header-icons { font-size: 1.6rem; }
+            .add-row { flex-direction: column; }
+            .add-group { min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-icons">&#129388; &#129361; &#127813; &#129385; &#129472; &#127858;</div>
+        <h1>Salad Calorie Calculator</h1>
+        <p class="subtitle">Calories per 100g &mdash; USDA data</p>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ingredient</th>
+                        <th class="right">Cal/100g</th>
+                        <th class="right">Grams</th>
+                        <th class="right">Calories</th>
+                        <th class="center"></th>
+                    </tr>
+                </thead>
+                <tbody id="item-body"></tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="2">Total</td>
+                        <td class="right" id="total-weight">0g</td>
+                        <td class="right" id="total-calories">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="btn-row">
+                <button onclick="clearAll()">Clear Grams</button>
+            </div>
+        </div>
+
+        <div class="add-card">
+            <h3>&#43; Add New Item</h3>
+            <div class="add-row">
+                <div class="add-group" style="flex:2">
+                    <label for="add-name">Name</label>
+                    <input type="text" id="add-name" placeholder="e.g. Hummus">
+                </div>
+                <div class="add-group">
+                    <label for="add-cal">Cal / 100g</label>
+                    <input type="number" id="add-cal" placeholder="e.g. 166" min="0">
+                </div>
+                <div class="add-group">
+                    <label for="add-cat">Category</label>
+                    <select id="add-cat"></select>
+                </div>
+                <button onclick="addItem()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'sc_items';
+
+        const defaultItems = [
+            { cat: 'Vegetables' },
+            { name: 'Cucumber', cal: 15 },
+            { name: 'Tomato', cal: 18 },
+            { name: 'Lettuce (iceberg)', cal: 14 },
+            { name: 'Lettuce (romaine)', cal: 17 },
+            { name: 'Rocket / Arugula', cal: 25 },
+            { name: 'Spinach', cal: 23 },
+            { name: 'Red Onion', cal: 40 },
+            { name: 'Spring Onion', cal: 32 },
+            { name: 'Bell Pepper (red)', cal: 31 },
+            { name: 'Bell Pepper (green)', cal: 20 },
+            { name: 'Bell Pepper (yellow)', cal: 27 },
+            { name: 'Carrot', cal: 41 },
+            { name: 'Celery', cal: 14 },
+            { name: 'Radish', cal: 16 },
+            { name: 'Beetroot', cal: 43 },
+            { name: 'Sweetcorn', cal: 96 },
+            { name: 'Avocado', cal: 160 },
+            { name: 'Cabbage (red)', cal: 31 },
+            { name: 'Cabbage (white)', cal: 25 },
+            { cat: 'Protein' },
+            { name: 'Hard-boiled Egg', cal: 155 },
+            { name: 'Chicken Breast (cooked)', cal: 165 },
+            { name: 'Tuna (canned, water)', cal: 128 },
+            { name: 'Tuna (canned, oil)', cal: 198 },
+            { name: 'Salmon (smoked)', cal: 117 },
+            { name: 'Tofu (firm)', cal: 144 },
+            { name: 'Chickpeas (cooked)', cal: 164 },
+            { name: 'Lentils (cooked)', cal: 116 },
+            { cat: 'Cheese' },
+            { name: 'Feta Cheese', cal: 264 },
+            { name: 'Mozzarella', cal: 318 },
+            { name: 'Parmesan', cal: 392 },
+            { name: 'Cheddar', cal: 403 },
+            { cat: 'Toppings' },
+            { name: 'Baked Beans', cal: 155 },
+            { name: 'Olives (black)', cal: 115 },
+            { name: 'Olives (green)', cal: 145 },
+            { name: 'Sun-dried Tomatoes', cal: 258 },
+            { name: 'Croutons', cal: 407 },
+            { name: 'Pine Nuts', cal: 673 },
+            { name: 'Walnuts', cal: 654 },
+            { name: 'Almonds (sliced)', cal: 579 },
+            { name: 'Sunflower Seeds', cal: 584 },
+            { name: 'Pumpkin Seeds', cal: 541 },
+            { cat: 'Dressings' },
+            { name: 'Olive Oil', cal: 884 },
+            { name: 'Balsamic Vinegar', cal: 88 },
+            { name: 'Lemon Juice', cal: 22 },
+            { name: 'Mayonnaise', cal: 680 },
+            { name: 'Tahini', cal: 592 },
+        ];
+
+        let items = loadItems();
+
+        function loadItems() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultItems));
+        }
+
+        function saveItems() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        }
+
+        function getCategories() {
+            return items.filter(f => f.cat).map(f => f.cat);
+        }
+
+        function buildCategoryDropdown() {
+            const sel = document.getElementById('add-cat');
+            sel.innerHTML = '';
+            getCategories().forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                sel.appendChild(opt);
+            });
+        }
+
+        function buildTable() {
+            const tbody = document.getElementById('item-body');
+            let html = '';
+
+            items.forEach((item, i) => {
+                if (item.cat) {
+                    html += '<tr class="separator-row"><td colspan="5">' + item.cat + '<button class="cat-delete" onclick="deleteCategory(' + i + ')" title="Delete category &amp; all its items">&#10005;</button></td></tr>';
+                } else {
+                    html += '<tr>' +
+                        '<td class="item-name">' + item.name + '</td>' +
+                        '<td class="right cal-per-100"><input type="number" class="cal-input" value="' + item.cal + '" min="0" onchange="updateCal(' + i + ', this.value)"></td>' +
+                        '<td class="right"><input type="number" id="g-' + i + '" min="0" placeholder="0" oninput="calculate()"></td>' +
+                        '<td class="cal-result empty" id="r-' + i + '">&mdash;</td>' +
+                        '<td class="center"><button class="delete-btn" onclick="deleteItem(' + i + ')" title="Delete item">&#10005;</button></td>' +
+                        '</tr>';
+                }
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function updateCal(index, value) {
+            const cal = parseInt(value);
+            if (isNaN(cal) || cal < 0) return;
+            items[index].cal = cal;
+            saveItems();
+            calculate();
+        }
+
+        function deleteItem(index) {
+            const item = items[index];
+            if (!confirm('Remove ' + item.name + '?')) return;
+            items.splice(index, 1);
+            saveItems();
+            buildTable();
+            buildCategoryDropdown();
+            calculate();
+        }
+
+        function deleteCategory(index) {
+            const cat = items[index].cat;
+            if (!confirm('Remove "' + cat + '" and all its items?')) return;
+            let count = 1;
+            for (let i = index + 1; i < items.length; i++) {
+                if (items[i].cat) break;
+                count++;
+            }
+            items.splice(index, count);
+            saveItems();
+            buildTable();
+            buildCategoryDropdown();
+            calculate();
+        }
+
+        function addItem() {
+            const nameInput = document.getElementById('add-name');
+            const calInput = document.getElementById('add-cal');
+            const catSelect = document.getElementById('add-cat');
+
+            const name = nameInput.value.trim();
+            const cal = parseInt(calInput.value);
+            const cat = catSelect.value;
+
+            if (!name) { alert('Please enter a name.'); return; }
+            if (isNaN(cal) || cal < 0) { alert('Please enter calories per 100g.'); return; }
+
+            let insertAt = -1;
+            let inCat = false;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].cat === cat) { inCat = true; continue; }
+                if (inCat && !items[i].cat) { insertAt = i + 1; }
+                if (inCat && items[i].cat) break;
+            }
+            if (insertAt === -1) insertAt = items.length;
+
+            items.splice(insertAt, 0, { name, cal });
+            saveItems();
+
+            nameInput.value = '';
+            calInput.value = '';
+
+            buildTable();
+            calculate();
+        }
+
+        function calculate() {
+            let totalCal = 0;
+            let totalGrams = 0;
+
+            items.forEach((item, i) => {
+                if (item.cat) return;
+                const input = document.getElementById('g-' + i);
+                const result = document.getElementById('r-' + i);
+                const grams = parseFloat(input.value);
+
+                if (grams > 0) {
+                    const cal = Math.round(grams * item.cal / 100);
+                    result.textContent = cal;
+                    result.className = 'cal-result';
+                    totalCal += cal;
+                    totalGrams += grams;
+                } else {
+                    result.innerHTML = '&mdash;';
+                    result.className = 'cal-result empty';
+                }
+            });
+
+            document.getElementById('total-calories').textContent = totalCal;
+            document.getElementById('total-weight').textContent = totalGrams + 'g';
+        }
+
+        function clearAll() {
+            items.forEach((item, i) => {
+                if (item.cat) return;
+                document.getElementById('g-' + i).value = '';
+            });
+            calculate();
+        }
+
+        buildTable();
+        buildCategoryDropdown();
+    </script>
+</body>
+</html>

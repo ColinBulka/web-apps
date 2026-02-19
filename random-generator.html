@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Information Generator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5e6d0;
+    color: #1a1a2e;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #16213e;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card h2 {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+    color: #16213e;
+  }
+
+  .result {
+    font-size: 3rem;
+    font-weight: 700;
+    min-height: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f3460;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .result.small { font-size: 1.8rem; }
+
+  .result.error {
+    font-size: 1rem;
+    color: #c0392b;
+    font-weight: 500;
+  }
+
+  button {
+    background: #0f3460;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.4rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 0.75rem;
+  }
+
+  button:hover { background: #1a4a7a; }
+  button:active { background: #0b2545; }
+
+  .word-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .word-buttons button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .word-buttons button.active {
+    background: #e94560;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .filter-row input {
+    width: 60px;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .filter-row input:focus {
+    outline: none;
+    border-color: #0f3460;
+  }
+</style>
+</head>
+<body>
+
+<h1>Random Information Generator</h1>
+
+<div class="grid">
+  <!-- Random Number -->
+  <div class="card">
+    <h2>Random Number (1 &ndash; 100)</h2>
+    <div class="result" id="number-result">&mdash;</div>
+    <button onclick="generateNumber()">Generate</button>
+  </div>
+
+  <!-- Random Letter -->
+  <div class="card">
+    <h2>Random Letter (A &ndash; Z)</h2>
+    <div class="result" id="letter-result">&mdash;</div>
+    <button onclick="generateLetter()">Generate</button>
+  </div>
+
+  <!-- Random Hebrew Letter -->
+  <div class="card">
+    <h2>Random Hebrew Letter</h2>
+    <div class="result" id="hebrew-result">&mdash;</div>
+    <button onclick="generateHebrew()">Generate</button>
+  </div>
+
+  <!-- Random Word -->
+  <div class="card">
+    <h2>Random Word</h2>
+    <div class="result small" id="word-result">&mdash;</div>
+    <div class="word-buttons">
+      <button onclick="generateWord('noun')" id="btn-noun">Noun</button>
+      <button onclick="generateWord('adjective')" id="btn-adjective">Adjective</button>
+      <button onclick="generateWord('verb')" id="btn-verb">Verb</button>
+    </div>
+    <div class="filter-row">
+      <label for="letter-count">Letter count:</label>
+      <input type="number" id="letter-count" min="1" max="50" placeholder="any">
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Random Number ---
+function generateNumber() {
+  const n = Math.floor(Math.random() * 100) + 1;
+  document.getElementById('number-result').textContent = n;
+}
+
+// --- Random Letter ---
+function generateLetter() {
+  const code = 65 + Math.floor(Math.random() * 26);
+  document.getElementById('letter-result').textContent = String.fromCharCode(code);
+}
+
+// --- Random Hebrew Letter ---
+const hebrewLetters = [
+  ['א', 'Aleph'],  ['ב', 'Bet'],    ['ג', 'Gimel'],  ['ד', 'Dalet'],
+  ['ה', 'He'],     ['ו', 'Vav'],    ['ז', 'Zayin'],  ['ח', 'Chet'],
+  ['ט', 'Tet'],    ['י', 'Yod'],    ['כ', 'Kaf'],    ['ל', 'Lamed'],
+  ['מ', 'Mem'],    ['נ', 'Nun'],    ['ס', 'Samekh'], ['ע', 'Ayin'],
+  ['פ', 'Pe'],     ['צ', 'Tsadi'],  ['ק', 'Qof'],   ['ר', 'Resh'],
+  ['ש', 'Shin'],   ['ת', 'Tav']
+];
+
+function generateHebrew() {
+  const [char, name] = hebrewLetters[Math.floor(Math.random() * hebrewLetters.length)];
+  document.getElementById('hebrew-result').textContent = char + '  ' + name;
+}
+
+// --- Random Word ---
+const words = {
+  noun: [
+    'cat', 'dog', 'sun', 'car', 'tree', 'book', 'fish', 'bird', 'lamp', 'door',
+    'ship', 'star', 'bell', 'lake', 'moon', 'rain', 'seed', 'leaf', 'rock', 'wind',
+    'apple', 'chair', 'house', 'river', 'cloud', 'watch', 'bread', 'flame', 'stone', 'wheel',
+    'bridge', 'castle', 'desert', 'forest', 'garden', 'island', 'planet', 'rocket', 'turtle', 'window',
+    'blanket', 'captain', 'diamond', 'feather', 'kitchen', 'lantern', 'orchard', 'pilgrim', 'shelter', 'village',
+    'airplane', 'calendar', 'elephant', 'fountain', 'mountain', 'newspaper', 'passport', 'sandwich', 'umbrella', 'treasure',
+    'butterfly', 'crocodile', 'fireworks', 'horseshoe', 'labyrinth', 'paintbrush', 'pineapple', 'scarecrow', 'telescope', 'waterfall',
+    'blackberry', 'chandelier', 'dictionary', 'trampoline', 'thumbtack', 'volleyball', 'wilderness', 'strawberry'
+  ],
+  adjective: [
+    'big', 'hot', 'old', 'red', 'wet', 'shy', 'raw', 'dim', 'fit', 'odd',
+    'bold', 'calm', 'cold', 'dark', 'deep', 'fair', 'fast', 'flat', 'free', 'glad',
+    'brave', 'clean', 'clear', 'cruel', 'eager', 'fresh', 'grand', 'happy', 'large', 'quiet',
+    'bitter', 'bright', 'clever', 'fierce', 'gentle', 'golden', 'honest', 'humble', 'narrow', 'polite',
+    'ancient', 'awkward', 'careful', 'complex', 'curious', 'elegant', 'fragile', 'genuine', 'patient', 'playful',
+    'cheerful', 'charming', 'colorful', 'fabulous', 'graceful', 'handsome', 'powerful', 'peaceful', 'splendid', 'thankful',
+    'delightful', 'wonderful', 'beautiful', 'brilliant', 'energetic', 'excellent', 'fantastic', 'invisible', 'magnetic', 'turbulent',
+    'comfortable', 'adventurous', 'imaginative', 'independent', 'resourceful', 'sympathetic'
+  ],
+  verb: [
+    'run', 'eat', 'fly', 'sit', 'ask', 'cut', 'dig', 'fix', 'hug', 'mix',
+    'bend', 'burn', 'call', 'dive', 'draw', 'fill', 'grow', 'hide', 'jump', 'kick',
+    'blink', 'build', 'carry', 'catch', 'chase', 'climb', 'dance', 'dream', 'float', 'knock',
+    'bounce', 'charge', 'create', 'escape', 'freeze', 'gather', 'juggle', 'launch', 'mingle', 'polish',
+    'arrange', 'breathe', 'collect', 'deliver', 'explore', 'impress', 'observe', 'perform', 'protect', 'scatter',
+    'announce', 'consider', 'decorate', 'exercise', 'generate', 'memorize', 'navigate', 'organize', 'rehearse', 'separate',
+    'calculate', 'cooperate', 'disappear', 'encourage', 'illustrate', 'photograph', 'strengthen', 'understand', 'exaggerate', 'accomplish',
+    'communicate', 'investigate', 'acknowledge', 'demonstrate', 'hallucinate', 'deteriorate'
+  ]
+};
+
+function generateWord(category) {
+  // Highlight active button
+  document.querySelectorAll('.word-buttons button').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + category).classList.add('active');
+
+  const input = document.getElementById('letter-count');
+  const count = input.value ? parseInt(input.value, 10) : null;
+  const el = document.getElementById('word-result');
+
+  let pool = words[category];
+  if (count) {
+    pool = pool.filter(w => w.length === count);
+  }
+
+  if (pool.length === 0) {
+    el.textContent = 'No ' + category + ' with ' + count + ' letters found';
+    el.classList.add('error');
+    return;
+  }
+
+  el.classList.remove('error');
+  el.textContent = pool[Math.floor(Math.random() * pool.length)];
+}
+</script>
+</body>
+</html>

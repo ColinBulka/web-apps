@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie &amp; Exercise Tracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f4f3;
+            color: #2d3436;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2d6a4f;
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card h2 {
+            color: #2d6a4f;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #b7e4c7;
+            padding-bottom: 8px;
+        }
+        .form-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 140px;
+        }
+        .form-group label {
+            font-size: 0.85rem;
+            color: #636e72;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .form-group input {
+            padding: 10px 12px;
+            border: 1.5px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #2d6a4f;
+        }
+        button {
+            padding: 10px 24px;
+            background: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover { background: #1b4332; }
+        .week-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .week-nav button {
+            padding: 6px 14px;
+            font-size: 0.9rem;
+        }
+        .week-label {
+            font-weight: 600;
+            color: #2d6a4f;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 8px 12px;
+            background: #d8f3dc;
+            color: #2d6a4f;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        th:first-child { border-radius: 8px 0 0 0; }
+        th:last-child { border-radius: 0 8px 0 0; }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+        tr:last-child td { border-bottom: none; }
+        .no-data { color: #b2bec3; font-style: italic; }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+        .summary-item {
+            background: #d8f3dc;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .summary-item .label {
+            font-size: 0.78rem;
+            color: #636e72;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-item .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2d6a4f;
+        }
+        .weight-history { margin-top: 12px; }
+        .weight-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+        .weight-entry:last-child { border-bottom: none; }
+        .weight-change { font-weight: 600; }
+        .weight-change.loss { color: #27ae60; }
+        .weight-change.gain { color: #e74c3c; }
+        .weight-change.same { color: #636e72; }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #b2bec3;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+        .delete-btn:hover { background: #fee; color: #e74c3c; }
+        .today-row { background: #f0faf4; }
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .form-row { flex-direction: column; }
+            .form-group { min-width: 100%; }
+            .summary-grid { grid-template-columns: 1fr 1fr; }
+            h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calorie &amp; Exercise Tracker</h1>
+
+        <!-- Daily Entry -->
+        <div class="card">
+            <h2>Log Daily Entry</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="entry-date">Date</label>
+                    <input type="date" id="entry-date">
+                </div>
+                <div class="form-group">
+                    <label for="calories-eaten">Calories Eaten</label>
+                    <input type="number" id="calories-eaten" placeholder="e.g. 2000" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="exercise-calories">Exercise Calories</label>
+                    <input type="number" id="exercise-calories" placeholder="e.g. 500" min="0">
+                </div>
+            </div>
+            <button onclick="saveEntry()">Save Entry</button>
+        </div>
+
+        <!-- Weekly Log -->
+        <div class="card">
+            <h2>Weekly Log</h2>
+            <div class="week-nav">
+                <button onclick="changeWeek(-1)">&larr; Prev</button>
+                <span class="week-label" id="week-label"></span>
+                <button onclick="changeWeek(1)">Next &rarr;</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Eaten</th>
+                        <th>Exercise</th>
+                        <th>Net</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="week-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Weekly Summary -->
+        <div class="card">
+            <h2>Weekly Summary</h2>
+            <div class="summary-grid" id="summary-grid"></div>
+        </div>
+
+        <!-- Weight Tracking -->
+        <div class="card">
+            <h2>Weight Tracking</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="weight-stones">Stones</label>
+                    <input type="number" id="weight-stones" placeholder="e.g. 12" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="weight-pounds">Pounds</label>
+                    <input type="number" id="weight-pounds" placeholder="e.g. 7" min="0" max="13" step="0.1">
+                </div>
+                <button onclick="saveWeight()">Save Weight</button>
+            </div>
+            <div class="weight-history" id="weight-history"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Storage ---
+        const ENTRIES_KEY = 'ct_entries';
+        const WEIGHTS_KEY = 'ct_weights';
+
+        function getEntries() {
+            return JSON.parse(localStorage.getItem(ENTRIES_KEY) || '{}');
+        }
+        function setEntries(entries) {
+            localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+        }
+        function getWeights() {
+            return JSON.parse(localStorage.getItem(WEIGHTS_KEY) || '{}');
+        }
+        function setWeights(weights) {
+            localStorage.setItem(WEIGHTS_KEY, JSON.stringify(weights));
+        }
+
+        // --- Date helpers ---
+        function getSunday(date) {
+            const d = new Date(date);
+            d.setDate(d.getDate() - d.getDay());
+            return d;
+        }
+        function toDateStr(d) {
+            return d.toISOString().slice(0, 10);
+        }
+        function dayName(d) {
+            return d.toLocaleDateString('en-US', { weekday: 'short' });
+        }
+        function displayDate(d) {
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }
+        function weekDates(monday) {
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(d.getDate() + i);
+                dates.push(d);
+            }
+            return dates;
+        }
+
+        // --- State ---
+        let currentSunday = getSunday(new Date());
+
+        // --- Init ---
+        function init() {
+            document.getElementById('entry-date').value = toDateStr(new Date());
+            render();
+        }
+
+        // --- Actions ---
+        function saveEntry() {
+            const date = document.getElementById('entry-date').value;
+            const eaten = parseInt(document.getElementById('calories-eaten').value);
+            const exercise = parseInt(document.getElementById('exercise-calories').value);
+
+            if (!date || isNaN(eaten)) {
+                alert('Please enter a date and calories eaten.');
+                return;
+            }
+
+            const entries = getEntries();
+            entries[date] = { eaten, exercise: exercise || 0 };
+            setEntries(entries);
+
+            currentSunday = getSunday(new Date(date + 'T12:00:00'));
+            document.getElementById('calories-eaten').value = '';
+            document.getElementById('exercise-calories').value = '';
+            render();
+        }
+
+        function deleteEntry(date) {
+            const entries = getEntries();
+            delete entries[date];
+            setEntries(entries);
+            render();
+        }
+
+        function changeWeek(delta) {
+            const d = new Date(currentSunday);
+            d.setDate(d.getDate() + delta * 7);
+            currentSunday = d;
+            render();
+        }
+
+        function saveWeight() {
+            const stones = parseInt(document.getElementById('weight-stones').value);
+            const pounds = parseFloat(document.getElementById('weight-pounds').value) || 0;
+            if (isNaN(stones) || stones < 0) {
+                alert('Please enter at least the stones value.');
+                return;
+            }
+            const totalLbs = stones * 14 + pounds;
+            const weights = getWeights();
+            weights[toDateStr(currentSunday)] = totalLbs;
+            setWeights(weights);
+            document.getElementById('weight-stones').value = '';
+            document.getElementById('weight-pounds').value = '';
+            render();
+        }
+
+        function formatWeight(totalLbs) {
+            const st = Math.floor(totalLbs / 14);
+            const lbs = totalLbs % 14;
+            return st + 'st ' + (Number.isInteger(lbs) ? lbs : lbs.toFixed(1)) + 'lbs';
+        }
+
+        function formatWeightDiff(diffLbs) {
+            const sign = diffLbs > 0 ? '+' : '';
+            const absDiff = Math.abs(diffLbs);
+            if (absDiff >= 14) {
+                const st = Math.floor(absDiff / 14);
+                const lbs = absDiff % 14;
+                const lbsStr = Number.isInteger(lbs) ? lbs : lbs.toFixed(1);
+                return sign + st + 'st ' + lbsStr + 'lbs';
+            }
+            const lbsStr = Number.isInteger(diffLbs) ? diffLbs : diffLbs.toFixed(1);
+            return sign + lbsStr + 'lbs';
+        }
+
+        // --- Render ---
+        function render() {
+            renderWeekLabel();
+            renderWeekTable();
+            renderSummary();
+            renderWeightInput();
+            renderWeightHistory();
+        }
+
+        function renderWeekLabel() {
+            const dates = weekDates(currentSunday);
+            document.getElementById('week-label').textContent =
+                displayDate(dates[0]) + ' \u2013 ' + displayDate(dates[6]);
+        }
+
+        function renderWeekTable() {
+            const entries = getEntries();
+            const dates = weekDates(currentSunday);
+            const tbody = document.getElementById('week-body');
+            const today = toDateStr(new Date());
+            tbody.innerHTML = '';
+
+            dates.forEach(d => {
+                const key = toDateStr(d);
+                const entry = entries[key];
+                const tr = document.createElement('tr');
+                if (key === today) tr.className = 'today-row';
+
+                if (entry) {
+                    const net = entry.eaten - entry.exercise;
+                    tr.innerHTML =
+                        '<td><strong>' + dayName(d) + '</strong> ' + displayDate(d) + (key === today ? ' \u2022' : '') + '</td>' +
+                        '<td>' + entry.eaten.toLocaleString() + '</td>' +
+                        '<td>' + entry.exercise.toLocaleString() + '</td>' +
+                        '<td>' + net.toLocaleString() + '</td>' +
+                        '<td><button class="delete-btn" onclick="deleteEntry(\'' + key + '\')" title="Delete">\u2715</button></td>';
+                } else {
+                    tr.innerHTML =
+                        '<td><strong>' + dayName(d) + '</strong> ' + displayDate(d) + (key === today ? ' \u2022' : '') + '</td>' +
+                        '<td class="no-data">\u2014</td>' +
+                        '<td class="no-data">\u2014</td>' +
+                        '<td class="no-data">\u2014</td>' +
+                        '<td></td>';
+                }
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderSummary() {
+            const entries = getEntries();
+            const dates = weekDates(currentSunday);
+            const weekEntries = dates.map(d => entries[toDateStr(d)]).filter(Boolean);
+            const grid = document.getElementById('summary-grid');
+
+            if (weekEntries.length === 0) {
+                grid.innerHTML = '<p class="no-data">No entries this week yet.</p>';
+                return;
+            }
+
+            const totalEaten = weekEntries.reduce((s, e) => s + e.eaten, 0);
+            const totalExercise = weekEntries.reduce((s, e) => s + e.exercise, 0);
+            const totalNet = totalEaten - totalExercise;
+            const n = weekEntries.length;
+            const avgEaten = Math.round(totalEaten / n);
+            const avgExercise = Math.round(totalExercise / n);
+            const avgNet = Math.round(totalNet / n);
+
+            grid.innerHTML =
+                summaryCard('Avg Daily Eaten', avgEaten.toLocaleString()) +
+                summaryCard('Avg Daily Exercise', avgExercise.toLocaleString()) +
+                summaryCard('Avg Daily Net', avgNet.toLocaleString()) +
+                summaryCard('Days Logged', n + ' / 7') +
+                summaryCard('Total Eaten', totalEaten.toLocaleString()) +
+                summaryCard('Total Exercise', totalExercise.toLocaleString()) +
+                summaryCard('Total Net', totalNet.toLocaleString());
+        }
+
+        function summaryCard(label, value) {
+            return '<div class="summary-item"><div class="label">' + label + '</div><div class="value">' + value + '</div></div>';
+        }
+
+        function renderWeightInput() {
+            const weights = getWeights();
+            const weekId = toDateStr(currentSunday);
+            const stonesInput = document.getElementById('weight-stones');
+            const poundsInput = document.getElementById('weight-pounds');
+            if (weights[weekId]) {
+                const st = Math.floor(weights[weekId] / 14);
+                const lbs = weights[weekId] % 14;
+                stonesInput.placeholder = 'Now: ' + st;
+                poundsInput.placeholder = 'Now: ' + (Number.isInteger(lbs) ? lbs : lbs.toFixed(1));
+            } else {
+                stonesInput.placeholder = 'e.g. 12';
+                poundsInput.placeholder = 'e.g. 7';
+            }
+        }
+
+        function renderWeightHistory() {
+            const weights = getWeights();
+            const container = document.getElementById('weight-history');
+            const weekIds = Object.keys(weights).sort().reverse();
+
+            if (weekIds.length === 0) {
+                container.innerHTML = '<p class="no-data">No weight entries yet.</p>';
+                return;
+            }
+
+            let html = '';
+            weekIds.forEach((weekId, i) => {
+                const weight = weights[weekId];
+                const label = 'Week of ' + displayDate(new Date(weekId + 'T12:00:00'));
+                let changeHtml = '';
+
+                if (i < weekIds.length - 1) {
+                    const prev = weights[weekIds[i + 1]];
+                    const diff = weight - prev;
+                    const cls = diff < 0 ? 'loss' : diff > 0 ? 'gain' : 'same';
+                    changeHtml = ' <span class="weight-change ' + cls + '">' + formatWeightDiff(diff) + '</span>';
+                }
+
+                const isCurrent = weekId === toDateStr(currentSunday);
+                html += '<div class="weight-entry"' + (isCurrent ? ' style="font-weight:600"' : '') + '>' +
+                    '<span>' + label + '</span>' +
+                    '<span>' + formatWeight(weight) + changeHtml + '</span>' +
+                    '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        init();
+    </script>
+</body>
+</html>
