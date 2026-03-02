@@ -211,6 +211,15 @@
       min-width: 0;
     }
 
+    .edit-icon {
+      opacity: 0;
+      font-size: 11px;
+      color: #a09080;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+    .project-row:hover .edit-icon { opacity: 1; }
+
     .proj-name-input {
       flex: 1;
       font-size: 13px;
@@ -335,7 +344,7 @@
 
 <div class="content">
   <div class="grid-wrapper" id="gridWrapper"></div>
-  <div class="hint">Click a cell to mark it active &nbsp;|&nbsp; Click &amp; drag along a row to fill a range &nbsp;|&nbsp; Double-click a name to rename &nbsp;|&nbsp; Click the colour square to change it</div>
+  <div class="hint">Click a cell to mark it active &nbsp;|&nbsp; Click &amp; drag along a row to fill a range &nbsp;|&nbsp; Click a name to rename &nbsp;|&nbsp; Click the colour square to change it</div>
 </div>
 
 <div class="color-palette" id="colorPalette" style="display:none;"></div>
@@ -465,8 +474,8 @@ function render() {
     const nameSpan = document.createElement('span');
     nameSpan.className = 'proj-name';
     nameSpan.textContent = proj.name;
-    nameSpan.title = 'Double-click to rename';
-    nameSpan.addEventListener('dblclick', () => startEdit(proj.id));
+    nameSpan.title = 'Click to rename';
+    nameSpan.addEventListener('click', () => startEdit(proj.id));
 
     const delBtn = document.createElement('button');
     delBtn.className = 'del-btn';
@@ -476,7 +485,11 @@ function render() {
       if (confirm(`Delete "${proj.name}"?`)) { deleteProj(proj.id); }
     });
 
-    inner.append(dot, nameSpan, delBtn);
+    const editIcon = document.createElement('span');
+    editIcon.className = 'edit-icon';
+    editIcon.textContent = '✎';
+
+    inner.append(dot, nameSpan, editIcon, delBtn);
     nameTd.appendChild(inner);
 
     // Timeline cells
