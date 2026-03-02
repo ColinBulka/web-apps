@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spot the Difference</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #1a1a2e;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 40px;
+  }
+
+  header {
+    padding: 28px 20px 16px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, #f093fb 0%, #f5a623 50%, #4ecdc4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    color: #a8b2d8;
+    margin-top: 6px;
+    font-size: 15px;
+  }
+
+  /* ── Setup panel ── */
+  .setup {
+    background: #16213e;
+    border-radius: 16px;
+    padding: 28px;
+    margin: 8px 20px 0;
+    max-width: 580px;
+    width: calc(100% - 40px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+  .setup-section-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7c8dbf;
+    margin-bottom: 10px;
+  }
+  .prompt-row {
+    display: flex;
+    gap: 8px;
+  }
+  .prompt-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 9px;
+    border: 2px solid #2d3561;
+    background: #0f3460;
+    color: #fff;
+    font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .prompt-row input:focus { outline: none; border-color: #f093fb; }
+  .divider { text-align: center; color: #4a5278; margin: 18px 0; font-size: 13px; }
+  .upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border: 2px dashed #2d3561;
+    border-radius: 9px;
+    cursor: pointer;
+    color: #a8b2d8;
+    font-size: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .upload-label:hover { border-color: #f093fb; background: rgba(240,147,251,0.05); }
+  .upload-label input { display: none; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 10px 22px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: transform 0.1s, opacity 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover  { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .btn:active { transform: translateY(0);    opacity: 0.85; }
+  .btn-primary  { background: linear-gradient(135deg, #f093fb, #f5a623); color: #fff; }
+  .btn-secondary { background: #2d3561; color: #a8b2d8; }
+
+  /* ── Loading ── */
+  .loading {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    color: #a8b2d8;
+    font-size: 16px;
+    gap: 16px;
+  }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 4px solid #2d3561;
+    border-top-color: #f093fb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Game ── */
+  .game {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 20px 0;
+    width: 100%;
+    max-width: 1120px;
+  }
+
+  /* score */
+  .score-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    font-size: 1.2rem;
+  }
+  .stars { display: flex; gap: 3px; font-size: 1.6rem; line-height: 1; }
+  .win-msg {
+    display: none;
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, #f093fb, #4ecdc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+  }
+
+  /* canvases */
+  .canvases {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .canvas-col { display: flex; flex-direction: column; align-items: center; }
+  .canvas-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #7c8dbf;
+    margin-bottom: 6px;
+  }
+  .canvas-wrap {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    cursor: crosshair;
+    border: 2px solid #2d3561;
+    transition: border-color 0.2s;
+  }
+  .canvas-wrap:hover { border-color: #f093fb; }
+  canvas { display: block; }
+
+  /* miss flash */
+  .miss-flash {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    background: rgba(255, 60, 60, 0.45);
+    animation: missAnim 0.45s ease-out forwards;
+  }
+  @keyframes missAnim {
+    from { transform: scale(0.3); opacity: 1; }
+    to   { transform: scale(2.5); opacity: 0; }
+  }
+
+  .game-hint {
+    margin-top: 12px;
+    color: #7c8dbf;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+  }
+  .game-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔍 Spot the Difference</h1>
+  <p class="subtitle">Find all 5 differences between the two pictures!</p>
+</header>
+
+<!-- Setup -->
+<div class="setup" id="setupPanel">
+  <div class="setup-section-label">🎨 Generate an AI image</div>
+  <div class="prompt-row">
+    <input type="text" id="promptInput" value="a sunny farm with a red barn, chickens, flowers, and a rainbow" placeholder="describe a scene…">
+    <button class="btn btn-primary" id="btnGenerate">Generate</button>
+  </div>
+
+  <div class="divider">— or upload your own —</div>
+
+  <label class="upload-label">
+    📁 Choose a photo from your device
+    <input type="file" id="fileInput" accept="image/*">
+  </label>
+</div>
+
+<!-- Loading -->
+<div class="loading" id="loadingPanel">
+  <div class="spinner"></div>
+  <span id="loadingMsg">Generating image…</span>
+</div>
+
+<!-- Game -->
+<div class="game" id="gamePanel">
+  <div class="score-bar">
+    <div class="stars" id="stars">☆☆☆☆☆</div>
+    <span id="scoreText">0 / 5 found</span>
+    <span class="win-msg" id="winMsg">🎉 You found them all!</span>
+  </div>
+
+  <div class="canvases">
+    <div class="canvas-col">
+      <div class="canvas-label">Original</div>
+      <div class="canvas-wrap" id="wrap1"><canvas id="canvas1"></canvas></div>
+    </div>
+    <div class="canvas-col">
+      <div class="canvas-label">Spot the differences →</div>
+      <div class="canvas-wrap" id="wrap2"><canvas id="canvas2"></canvas></div>
+    </div>
+  </div>
+
+  <p class="game-hint">Click anywhere on either picture where you see a difference</p>
+
+  <div class="game-actions">
+    <button class="btn btn-secondary" id="btnReveal">Reveal all</button>
+    <button class="btn btn-secondary" id="btnNewGame">↩ New game</button>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let differences = [];
+let foundCount  = 0;
+let gameActive  = false;
+let audioCtx    = null;
+
+const canvas1 = document.getElementById('canvas1');
+const canvas2 = document.getElementById('canvas2');
+const ctx1    = canvas1.getContext('2d', { willReadFrequently: true });
+const ctx2    = canvas2.getContext('2d', { willReadFrequently: true });
+
+// ── Setup controls ─────────────────────────────────────────────────────────
+document.getElementById('btnGenerate').addEventListener('click', () => {
+  const raw = document.getElementById('promptInput').value.trim();
+  const prompt = raw || 'a colorful garden with butterflies and flowers';
+  generateAI(prompt);
+});
+
+document.getElementById('promptInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btnGenerate').click();
+});
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  showLoading('Loading image…');
+  const reader = new FileReader();
+  reader.onload = ev => loadImg(ev.target.result, false);
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('btnNewGame').addEventListener('click', resetToSetup);
+document.getElementById('btnReveal').addEventListener('click', revealAll);
+
+document.getElementById('wrap1').addEventListener('click', e => handleClick(e, canvas1, 'wrap1'));
+document.getElementById('wrap2').addEventListener('click', e => handleClick(e, canvas2, 'wrap2'));
+
+// ── Image loading ──────────────────────────────────────────────────────────
+function generateAI(prompt) {
+  showLoading('Generating AI image… (may take 10–20 s)');
+  // Pollinations.ai — free, no key required, sends CORS headers
+  const seed = Math.floor(Math.random() * 99999);
+  const url  = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=640&height=480&nologo=true&seed=${seed}`;
+  loadImg(url, true);
+}
+
+function loadImg(src, crossOrigin) {
+  const img = new Image();
+  if (crossOrigin) img.crossOrigin = 'anonymous';
+  img.onload  = () => startGame(img);
+  img.onerror = () => {
+    hideLoading();
+    alert('Could not load the image. Try a different prompt or upload your own photo.');
+  };
+  img.src = src;
+}
+
+// ── Game setup ─────────────────────────────────────────────────────────────
+function startGame(img) {
+  // Size canvases to fit side-by-side on screen
+  const maxW = Math.min(480, Math.floor((window.innerWidth - 80) / 2));
+  const maxH = 400;
+  const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+  const w = Math.round(img.width  * scale);
+  const h = Math.round(img.height * scale);
+
+  canvas1.width  = canvas2.width  = w;
+  canvas1.height = canvas2.height = h;
+
+  ctx1.drawImage(img, 0, 0, w, h);
+  ctx2.drawImage(img, 0, 0, w, h);
+
+  // Generate and apply differences to canvas2
+  differences = placeDifferences(w, h);
+  let pixelOk = true;
+  try {
+    ctx2.getImageData(0, 0, 1, 1); // test for CORS taint
+  } catch(e) {
+    pixelOk = false;
+  }
+  applyDifferences(pixelOk);
+
+  foundCount  = 0;
+  gameActive  = true;
+
+  document.getElementById('winMsg').style.display = 'none';
+  updateScore();
+
+  document.getElementById('loadingPanel').style.display = 'none';
+  document.getElementById('setupPanel').style.display   = 'none';
+  document.getElementById('gamePanel').style.display    = 'flex';
+}
+
+// ── Place 5 non-overlapping differences ───────────────────────────────────
+function placeDifferences(w, h) {
+  const margin  = 55;
+  const minDist = 95;
+  const types   = shuffle(['add-circle', 'brightness', 'color-swap', 'saturation', 'hue-shift']);
+  const diffs   = [];
+
+  let tries = 0;
+  while (diffs.length < 5 && tries < 1000) {
+    tries++;
+    const x = margin + Math.random() * (w - margin * 2);
+    const y = margin + Math.random() * (h - margin * 2);
+    if (diffs.every(d => Math.hypot(d.x - x, d.y - y) > minDist)) {
+      diffs.push({
+        x: Math.round(x),
+        y: Math.round(y),
+        r: 26 + Math.floor(Math.random() * 14), // 26–40 px
+        type: types[diffs.length],
+        found: false
+      });
+    }
+  }
+  return diffs;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ── Apply differences to canvas2 ──────────────────────────────────────────
+function applyDifferences(pixelOk) {
+  for (const d of differences) {
+    if (!pixelOk && d.type !== 'add-circle') {
+      d.type = 'add-circle'; // safe fallback when canvas is CORS-tainted
+    }
+    applyOne(d);
+  }
+}
+
+const BRIGHT_COLORS = ['#ff4757','#ffa502','#2ed573','#1e90ff','#ff6b81','#eccc68','#a29bfe','#ff6348'];
+
+function applyOne(d) {
+  const { x, y, r, type } = d;
+
+  if (type === 'add-circle') {
+    // Simply paint a vivid circle only on canvas2
+    ctx2.save();
+    ctx2.beginPath();
+    ctx2.arc(x, y, r * 0.55, 0, Math.PI * 2);
+    ctx2.fillStyle = BRIGHT_COLORS[Math.floor(Math.random() * BRIGHT_COLORS.length)];
+    ctx2.fill();
+    ctx2.restore();
+    return;
+  }
+
+  // Pixel-level manipulations inside a circular mask
+  const x0 = Math.max(0, x - r);
+  const y0 = Math.max(0, y - r);
+  const x1 = Math.min(canvas2.width,  x + r);
+  const y1 = Math.min(canvas2.height, y + r);
+  const rw = x1 - x0, rh = y1 - y0;
+  if (rw <= 0 || rh <= 0) return;
+
+  let imgData;
+  try { imgData = ctx2.getImageData(x0, y0, rw, rh); }
+  catch(e) { return; }
+  const px = imgData.data;
+
+  for (let row = 0; row < rh; row++) {
+    for (let col = 0; col < rw; col++) {
+      const dx = (x0 + col) - x;
+      const dy = (y0 + row) - y;
+      if (dx * dx + dy * dy > r * r) continue;
+      const i = (row * rw + col) * 4;
+
+      if      (type === 'brightness') { px[i]=clamp(px[i]+70); px[i+1]=clamp(px[i+1]+70); px[i+2]=clamp(px[i+2]+70); }
+      else if (type === 'color-swap') { const t=px[i]; px[i]=px[i+2]; px[i+2]=t; }
+      else if (type === 'saturation') { const g=(px[i]*.299+px[i+1]*.587+px[i+2]*.114)|0; px[i]=px[i+1]=px[i+2]=g; }
+      else if (type === 'hue-shift') {
+        const [h,s,l] = rgbToHsl(px[i],px[i+1],px[i+2]);
+        const [r2,g2,b2] = hslToRgb((h+0.33)%1, s, l);
+        px[i]=r2; px[i+1]=g2; px[i+2]=b2;
+      }
+    }
+  }
+  ctx2.putImageData(imgData, x0, y0);
+}
+
+function clamp(v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
+
+function rgbToHsl(r, g, b) {
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  const l=(max+min)/2;
+  if (max===min) return [0,0,l];
+  const d=max-min, s=l>0.5?d/(2-max-min):d/(max+min);
+  let h;
+  if      (max===r) h=((g-b)/d+(g<b?6:0))/6;
+  else if (max===g) h=((b-r)/d+2)/6;
+  else              h=((r-g)/d+4)/6;
+  return [h,s,l];
+}
+
+function hslToRgb(h, s, l) {
+  if (s===0) { const v=Math.round(l*255); return [v,v,v]; }
+  const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
+  const hue2rgb=(p,q,t)=>{
+    if(t<0)t+=1; if(t>1)t-=1;
+    if(t<1/6)return p+(q-p)*6*t;
+    if(t<1/2)return q;
+    if(t<2/3)return p+(q-p)*(2/3-t)*6;
+    return p;
+  };
+  return [Math.round(hue2rgb(p,q,h+1/3)*255),
+          Math.round(hue2rgb(p,q,h    )*255),
+          Math.round(hue2rgb(p,q,h-1/3)*255)];
+}
+
+// ── Click detection ────────────────────────────────────────────────────────
+function handleClick(e, canvas, wrapId) {
+  if (!gameActive) return;
+  const rect   = canvas.getBoundingClientRect();
+  const scaleX = canvas.width  / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx     = (e.clientX - rect.left) * scaleX;
+  const cy     = (e.clientY - rect.top)  * scaleY;
+
+  const hitR = 50; // generous for children
+  const hit  = differences.find(d => !d.found && Math.hypot(d.x - cx, d.y - cy) <= hitR);
+
+  if (hit) {
+    hit.found = true;
+    foundCount++;
+    tone(true);
+    markFound(hit);
+    updateScore();
+    if (foundCount === 5) setTimeout(winGame, 500);
+  } else {
+    tone(false);
+    spawnMiss(e, wrapId);
+  }
+}
+
+function markFound(d) {
+  for (const ctx of [ctx1, ctx2]) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r + 10, 0, Math.PI * 2);
+    ctx.strokeStyle = '#2ed573';
+    ctx.lineWidth   = 3.5;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(46,213,115,0.18)';
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function spawnMiss(e, wrapId) {
+  const wrap = document.getElementById(wrapId);
+  const rect = wrap.getBoundingClientRect();
+  const el   = document.createElement('div');
+  el.className = 'miss-flash';
+  const sz = 44;
+  el.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-rect.left-sz/2}px;top:${e.clientY-rect.top-sz/2}px;`;
+  wrap.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
+// ── Score ──────────────────────────────────────────────────────────────────
+function updateScore() {
+  document.getElementById('scoreText').textContent = `${foundCount} / 5 found`;
+  document.getElementById('stars').textContent = '⭐'.repeat(foundCount) + '☆'.repeat(5 - foundCount);
+}
+
+// ── Win ────────────────────────────────────────────────────────────────────
+function winGame() {
+  gameActive = false;
+  document.getElementById('winMsg').style.display = 'inline';
+  document.getElementById('scoreText').style.display = 'none';
+  tone(true); tone(true);
+}
+
+function revealAll() {
+  for (const d of differences) {
+    if (!d.found) { d.found = true; foundCount++; markFound(d); }
+  }
+  gameActive = false;
+  updateScore();
+  document.getElementById('winMsg').style.display = 'inline';
+  document.getElementById('scoreText').style.display = 'none';
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function showLoading(msg) {
+  document.getElementById('loadingMsg').textContent = msg;
+  document.getElementById('setupPanel').style.display  = 'none';
+  document.getElementById('gamePanel').style.display   = 'none';
+  document.getElementById('loadingPanel').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loadingPanel').style.display = 'none';
+  document.getElementById('setupPanel').style.display   = 'block';
+}
+
+function resetToSetup() {
+  gameActive = false;
+  document.getElementById('gamePanel').style.display  = 'none';
+  document.getElementById('setupPanel').style.display = 'block';
+  document.getElementById('scoreText').style.display  = 'inline';
+  document.getElementById('winMsg').style.display     = 'none';
+  document.getElementById('fileInput').value = '';
+}
+
+// ── Audio ──────────────────────────────────────────────────────────────────
+function tone(success) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    if (success) {
+      osc.frequency.setValueAtTime(523, now);       // C5
+      osc.frequency.setValueAtTime(659, now + 0.1); // E5
+      osc.frequency.setValueAtTime(784, now + 0.2); // G5
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc.start(now); osc.stop(now + 0.45);
+    } else {
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.setValueAtTime(180, now + 0.1);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.start(now); osc.stop(now + 0.25);
+    }
+  } catch(e) { /* audio not available */ }
+}
+</script>
+</body>
+</html>
