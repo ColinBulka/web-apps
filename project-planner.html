@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Planner</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f0e8;
+      color: #1a2a3a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: #1a2a3a;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+
+    .toolbar h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #e8c96d;
+      letter-spacing: 0.03em;
+    }
+
+    .spacer { flex: 1; }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .toolbar-group span { white-space: nowrap; }
+
+    .btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.96); }
+
+    .btn-primary {
+      background: #e8c96d;
+      color: #1a2a3a;
+    }
+    .btn-primary:hover { background: #f0d87a; }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.12);
+      color: white;
+      padding: 5px 10px;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.22); }
+
+    #yearRange {
+      min-width: 80px;
+      text-align: center;
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    /* ── Main content ── */
+    .content {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px 12px;
+    }
+
+    .grid-wrapper {
+      flex: 1;
+      overflow: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.1);
+      background: white;
+    }
+
+    /* ── Table ── */
+    table {
+      border-collapse: collapse;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    /* Sticky header rows */
+    thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 6; }
+    thead tr:nth-child(2) th { position: sticky; top: 33px; z-index: 6; }
+
+    /* Sticky first column */
+    .col-label {
+      position: sticky;
+      left: 0;
+      z-index: 4;
+    }
+
+    /* Top-left corners get max z-index */
+    thead .col-label { z-index: 8; }
+
+    /* ── Year header ── */
+    .year-header th {
+      background: #1a2a3a;
+      color: rgba(255,255,255,0.9);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      padding: 7px 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      white-space: nowrap;
+    }
+
+    .year-header th.col-label {
+      text-align: left;
+      padding: 7px 14px;
+      color: #e8c96d;
+      font-size: 13px;
+    }
+
+    /* ── Month header ── */
+    .month-header th {
+      background: #2d4a6a;
+      color: rgba(255,255,255,0.85);
+      font-size: 11px;
+      font-weight: 500;
+      text-align: center;
+      padding: 5px 3px;
+      min-width: 48px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .month-header th.col-label {
+      text-align: left;
+      padding: 5px 14px;
+      color: rgba(255,255,255,0.6);
+      background: #2d4a6a;
+      font-size: 11px;
+    }
+
+    .month-header th.today-month {
+      background: #3a5a8a;
+      color: #e8c96d;
+      font-weight: 700;
+    }
+
+    /* ── Project rows ── */
+    .project-row td {
+      height: 42px;
+      border-bottom: 1px solid #f0ebe0;
+      border-right: 1px solid #f0ebe0;
+    }
+
+    .project-row:last-of-type td { border-bottom: none; }
+
+    .project-row td.col-label {
+      background: white;
+      border-right: 2px solid #e8e0d0;
+    }
+
+    /* ── Project name cell interior ── */
+    .name-cell-inner {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 8px 0 14px;
+      height: 42px;
+    }
+
+    .color-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      cursor: pointer;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      transition: transform 0.12s;
+    }
+    .color-dot:hover { transform: scale(1.25); }
+
+    .proj-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: text;
+      min-width: 0;
+    }
+
+    .proj-name-input {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1.5px solid #2d4a6a;
+      border-radius: 4px;
+      padding: 2px 6px;
+      outline: none;
+      min-width: 0;
+      color: #1a2a3a;
+      background: #f8f6f0;
+    }
+
+    .del-btn {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: transparent;
+      color: #c8bfb0;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s, color 0.12s;
+    }
+    .del-btn:hover { background: #ffe8e8; color: #d94040; }
+
+    /* ── Timeline cells ── */
+    .t-cell {
+      cursor: pointer;
+      user-select: none;
+      transition: filter 0.08s;
+      position: relative;
+    }
+    .t-cell:hover { filter: brightness(0.88); }
+
+    .t-cell.today-month {
+      background-color: rgba(232, 201, 109, 0.09);
+    }
+
+    /* Today dot overlay */
+    .today-dot {
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #e8c96d;
+      pointer-events: none;
+    }
+
+    /* ── Add-project row ── */
+    .add-row td {
+      padding: 10px 14px;
+    }
+
+    .add-btn {
+      background: none;
+      border: 1.5px dashed #c8bfb0;
+      border-radius: 6px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: #a09080;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .add-btn:hover { border-color: #2d4a6a; color: #2d4a6a; }
+
+    /* ── Color palette popup ── */
+    .color-palette {
+      position: fixed;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.22);
+      padding: 10px;
+      display: grid;
+      grid-template-columns: repeat(5, 26px);
+      gap: 5px;
+      z-index: 1000;
+    }
+
+    .c-opt {
+      width: 26px;
+      height: 26px;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.1s, border-color 0.1s;
+    }
+    .c-opt:hover { transform: scale(1.2); }
+    .c-opt.active { border-color: #1a2a3a; }
+
+    /* ── Footer hint ── */
+    .hint {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #a09080;
+    }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <h1>Project Planner</h1>
+  <div class="spacer"></div>
+  <div class="toolbar-group">
+    <span>Show:</span>
+    <button class="btn btn-ghost" id="btnPrevYear">&#8592;</button>
+    <span id="yearRange"></span>
+    <button class="btn btn-ghost" id="btnNextYear">&#8594;</button>
+    <button class="btn btn-ghost" id="btnRemoveYear" title="Show fewer years">&#8722; yr</button>
+    <button class="btn btn-ghost" id="btnAddYear" title="Show more years">&#43; yr</button>
+  </div>
+  <button class="btn btn-primary" id="btnAddProject">+ Add Project</button>
+</div>
+
+<div class="content">
+  <div class="grid-wrapper" id="gridWrapper"></div>
+  <div class="hint">Click a cell to mark it active &nbsp;|&nbsp; Click &amp; drag along a row to fill a range &nbsp;|&nbsp; Double-click a name to rename &nbsp;|&nbsp; Click the colour square to change it</div>
+</div>
+
+<div class="color-palette" id="colorPalette" style="display:none;"></div>
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+
+const PALETTE = [
+  '#4f86f7','#7c60d8','#d84f9a','#f7524f','#f7884f',
+  '#f7c24f','#93c74f','#4fc97e','#4fc9bb','#4fadf7',
+  '#8b6f47','#6b7c93','#c74f4f','#4f7ac7','#c7944f',
+];
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// ── State ─────────────────────────────────────────────────────────────────
+
+let state = {
+  projects: [],
+  startYear: 2026,
+  numYears: 3,
+};
+
+let dragState  = null; // { projectId, mode: 'fill'|'clear' }
+let pickerFor  = null; // project id
+
+// ── Storage ───────────────────────────────────────────────────────────────
+
+function save() {
+  localStorage.setItem('pp_v1', JSON.stringify({
+    projects: state.projects.map(p => ({ ...p, cells: [...p.cells] })),
+    startYear: state.startYear,
+    numYears: state.numYears,
+  }));
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('pp_v1');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    state.startYear = d.startYear ?? 2026;
+    state.numYears  = d.numYears  ?? 3;
+    state.projects  = (d.projects ?? []).map(p => ({ ...p, cells: new Set(p.cells ?? []) }));
+  } catch(e) {}
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function uid() { return Math.random().toString(36).slice(2, 10); }
+
+function mkey(year, month) { return `${year}-${String(month+1).padStart(2,'0')}`; }
+
+function todayKey() {
+  const n = new Date();
+  return mkey(n.getFullYear(), n.getMonth());
+}
+
+function buildCols() {
+  const cols = [];
+  for (let y = 0; y < state.numYears; y++) {
+    const year = state.startYear + y;
+    for (let m = 0; m < 12; m++) cols.push({ year, month: m, key: mkey(year, m) });
+  }
+  return cols;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+
+function render() {
+  const wrapper = document.getElementById('gridWrapper');
+  wrapper.innerHTML = '';
+
+  const cols   = buildCols();
+  const today  = todayKey();
+  const table  = document.createElement('table');
+  const thead  = table.createTHead();
+  const tbody  = table.createTBody();
+
+  // Year header
+  const yearRow = thead.insertRow();
+  yearRow.className = 'year-header';
+  const yhCorner = document.createElement('th');
+  yhCorner.className = 'col-label';
+  yhCorner.style.minWidth = '190px';
+  yhCorner.textContent = 'Project Planner';
+  yearRow.appendChild(yhCorner);
+  for (let y = 0; y < state.numYears; y++) {
+    const th = document.createElement('th');
+    th.colSpan = 12;
+    th.textContent = state.startYear + y;
+    yearRow.appendChild(th);
+  }
+
+  // Month header
+  const monthRow = thead.insertRow();
+  monthRow.className = 'month-header';
+  const mhCorner = document.createElement('th');
+  mhCorner.className = 'col-label';
+  mhCorner.textContent = 'Projects';
+  monthRow.appendChild(mhCorner);
+  for (const col of cols) {
+    const th = document.createElement('th');
+    th.textContent = MONTHS[col.month];
+    if (col.key === today) th.classList.add('today-month');
+    monthRow.appendChild(th);
+  }
+
+  // Project rows
+  for (const proj of state.projects) {
+    const row = tbody.insertRow();
+    row.className = 'project-row';
+    row.dataset.id = proj.id;
+
+    // Name cell
+    const nameTd = row.insertCell();
+    nameTd.className = 'col-label';
+    const inner = document.createElement('div');
+    inner.className = 'name-cell-inner';
+
+    const dot = document.createElement('div');
+    dot.className = 'color-dot';
+    dot.style.background = proj.color;
+    dot.title = 'Change colour';
+    dot.addEventListener('click', e => { e.stopPropagation(); openPicker(proj.id, dot); });
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'proj-name';
+    nameSpan.textContent = proj.name;
+    nameSpan.title = 'Double-click to rename';
+    nameSpan.addEventListener('dblclick', () => startEdit(proj.id));
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-btn';
+    delBtn.innerHTML = '&times;';
+    delBtn.title = 'Delete project';
+    delBtn.addEventListener('click', () => {
+      if (confirm(`Delete "${proj.name}"?`)) { deleteProj(proj.id); }
+    });
+
+    inner.append(dot, nameSpan, delBtn);
+    nameTd.appendChild(inner);
+
+    // Timeline cells
+    for (const col of cols) {
+      const td = row.insertCell();
+      td.className = 't-cell';
+      if (col.key === today) td.classList.add('today-month');
+      td.dataset.id  = proj.id;
+      td.dataset.key = col.key;
+      applyCell(td, proj, col.key, today);
+
+      td.addEventListener('mousedown', e => {
+        e.preventDefault();
+        const mode = proj.cells.has(col.key) ? 'clear' : 'fill';
+        dragState = { projectId: proj.id, mode };
+        setCell(proj, col.key, mode);
+        applyCell(td, proj, col.key, today);
+        save();
+      });
+
+      td.addEventListener('mouseenter', () => {
+        if (!dragState || dragState.projectId !== proj.id) return;
+        setCell(proj, col.key, dragState.mode);
+        applyCell(td, proj, col.key, today);
+        save();
+      });
+    }
+  }
+
+  // Add row
+  const addRow = tbody.insertRow();
+  addRow.className = 'add-row';
+  const addTd = addRow.insertCell();
+  addTd.colSpan = cols.length + 1;
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.textContent = '+ Add Project';
+  addBtn.addEventListener('click', () => addProj());
+  addTd.appendChild(addBtn);
+
+  wrapper.appendChild(table);
+
+  // Update year range label
+  const endYear = state.startYear + state.numYears - 1;
+  document.getElementById('yearRange').textContent =
+    state.numYears === 1 ? String(state.startYear) : `${state.startYear} – ${endYear}`;
+}
+
+function applyCell(td, proj, key, today) {
+  td.innerHTML = '';
+  if (proj.cells.has(key)) {
+    td.style.background = proj.color;
+    if (key === today) {
+      const dot = document.createElement('div');
+      dot.className = 'today-dot';
+      td.appendChild(dot);
+    }
+  } else {
+    td.style.background = '';
+    if (key === today) td.style.background = 'rgba(232,201,109,0.09)';
+  }
+}
+
+function setCell(proj, key, mode) {
+  if (mode === 'fill') proj.cells.add(key);
+  else                 proj.cells.delete(key);
+}
+
+// ── Project CRUD ──────────────────────────────────────────────────────────
+
+function addProj(name) {
+  const color = PALETTE[state.projects.length % PALETTE.length];
+  const id    = uid();
+  state.projects.push({ id, name: name || `Project ${state.projects.length + 1}`, color, cells: new Set() });
+  save();
+  render();
+  setTimeout(() => startEdit(id), 20);
+}
+
+function deleteProj(id) {
+  state.projects = state.projects.filter(p => p.id !== id);
+  save();
+  render();
+}
+
+// ── Inline rename ─────────────────────────────────────────────────────────
+
+function startEdit(id) {
+  const proj = state.projects.find(p => p.id === id);
+  if (!proj) return;
+  const row  = document.querySelector(`.project-row[data-id="${id}"]`);
+  if (!row) return;
+  const span = row.querySelector('.proj-name');
+  if (!span) return;
+
+  const input = document.createElement('input');
+  input.className = 'proj-name-input';
+  input.value = proj.name;
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    proj.name = input.value.trim() || proj.name;
+    save();
+    render();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { input.blur(); }
+    if (e.key === 'Escape') { input.value = proj.name; input.blur(); }
+  });
+}
+
+// ── Colour picker ─────────────────────────────────────────────────────────
+
+function openPicker(id, anchor) {
+  const proj    = state.projects.find(p => p.id === id);
+  const palette = document.getElementById('colorPalette');
+  pickerFor = id;
+  palette.innerHTML = '';
+
+  for (const c of PALETTE) {
+    const opt = document.createElement('div');
+    opt.className = 'c-opt' + (c === proj.color ? ' active' : '');
+    opt.style.background = c;
+    opt.addEventListener('click', () => {
+      proj.color = c;
+      save();
+      render();
+      palette.style.display = 'none';
+      pickerFor = null;
+    });
+    palette.appendChild(opt);
+  }
+
+  const rect = anchor.getBoundingClientRect();
+  palette.style.left = rect.left + 'px';
+  palette.style.top  = (rect.bottom + 4) + 'px';
+  palette.style.display = 'grid';
+}
+
+// ── Global events ─────────────────────────────────────────────────────────
+
+document.addEventListener('mouseup',  () => { dragState = null; });
+
+document.addEventListener('click', e => {
+  const palette = document.getElementById('colorPalette');
+  if (pickerFor && !palette.contains(e.target) && !e.target.classList.contains('color-dot')) {
+    palette.style.display = 'none';
+    pickerFor = null;
+  }
+});
+
+document.getElementById('btnAddProject').addEventListener('click', () => addProj());
+
+document.getElementById('btnAddYear').addEventListener('click', () => {
+  state.numYears = Math.min(state.numYears + 1, 8);
+  save(); render();
+});
+
+document.getElementById('btnRemoveYear').addEventListener('click', () => {
+  state.numYears = Math.max(state.numYears - 1, 1);
+  save(); render();
+});
+
+document.getElementById('btnNextYear').addEventListener('click', () => {
+  state.startYear++;
+  save(); render();
+});
+
+document.getElementById('btnPrevYear').addEventListener('click', () => {
+  state.startYear--;
+  save(); render();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+
+load();
+
+if (state.projects.length === 0) {
+  state.projects = [
+    { id: uid(), name: 'Website Redesign',    color: '#4f86f7', cells: new Set(['2026-01','2026-02','2026-03','2026-04']) },
+    { id: uid(), name: 'Mobile App',          color: '#4fc97e', cells: new Set(['2026-03','2026-04','2026-05','2026-06','2026-07']) },
+    { id: uid(), name: 'Marketing Campaign',  color: '#f7c24f', cells: new Set(['2026-06','2026-07','2026-08']) },
+    { id: uid(), name: 'Infrastructure',      color: '#d84f9a', cells: new Set(['2026-01','2026-05','2026-06','2026-09','2026-10','2026-11','2026-12']) },
+  ];
+  save();
+}
+
+render();
+</script>
+</body>
+</html>
