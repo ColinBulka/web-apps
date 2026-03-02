@@ -6,201 +6,81 @@
 <title>Spot the Difference</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #1a1a2e;
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    background: #1a1a2e; color: #fff;
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
     padding-bottom: 40px;
   }
-
-  header {
-    padding: 28px 20px 16px;
-    text-align: center;
-  }
+  header { padding: 28px 20px 16px; text-align: center; }
   h1 {
     font-size: 2.2rem;
     background: linear-gradient(135deg, #f093fb 0%, #f5a623 50%, #4ecdc4 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .subtitle {
-    color: #a8b2d8;
-    margin-top: 6px;
-    font-size: 15px;
-  }
+  .subtitle { color: #a8b2d8; margin-top: 6px; font-size: 15px; }
 
-  /* ── Setup panel ── */
   .setup {
-    background: #16213e;
-    border-radius: 16px;
-    padding: 28px;
-    margin: 8px 20px 0;
-    max-width: 580px;
-    width: calc(100% - 40px);
+    background: #16213e; border-radius: 16px; padding: 28px;
+    margin: 8px 20px 0; max-width: 520px; width: calc(100% - 40px);
     box-shadow: 0 8px 32px rgba(0,0,0,0.35);
   }
-  .setup-section-label {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #7c8dbf;
-    margin-bottom: 10px;
-  }
-  .prompt-row {
-    display: flex;
-    gap: 8px;
-  }
-  .prompt-row input {
-    flex: 1;
-    padding: 10px 14px;
-    border-radius: 9px;
-    border: 2px solid #2d3561;
-    background: #0f3460;
-    color: #fff;
-    font-size: 14px;
-    transition: border-color 0.15s;
-  }
-  .prompt-row input:focus { outline: none; border-color: #f093fb; }
+  .setup-label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #7c8dbf; margin-bottom: 10px; }
+  .btn-row { display: flex; gap: 10px; justify-content: center; }
   .divider { text-align: center; color: #4a5278; margin: 18px 0; font-size: 13px; }
   .upload-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 16px;
-    border: 2px dashed #2d3561;
-    border-radius: 9px;
-    cursor: pointer;
-    color: #a8b2d8;
-    font-size: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 16px; border: 2px dashed #2d3561; border-radius: 9px;
+    cursor: pointer; color: #a8b2d8; font-size: 14px;
     transition: border-color 0.2s, background 0.2s;
   }
   .upload-label:hover { border-color: #f093fb; background: rgba(240,147,251,0.05); }
   .upload-label input { display: none; }
 
-  /* ── Buttons ── */
   .btn {
-    padding: 10px 22px;
-    border-radius: 9px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    transition: transform 0.1s, opacity 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
+    padding: 12px 26px; border-radius: 9px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 700; transition: transform 0.1s, box-shadow 0.15s;
   }
-  .btn:hover  { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-  .btn:active { transform: translateY(0);    opacity: 0.85; }
-  .btn-primary  { background: linear-gradient(135deg, #f093fb, #f5a623); color: #fff; }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .btn:active { transform: translateY(0); opacity: 0.85; }
+  .btn-primary { background: linear-gradient(135deg, #f093fb, #f5a623); color: #fff; }
   .btn-secondary { background: #2d3561; color: #a8b2d8; }
 
-  /* ── Loading ── */
   .loading {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 60px 20px;
-    color: #a8b2d8;
-    font-size: 16px;
-    gap: 16px;
+    display: none; flex-direction: column; align-items: center;
+    padding: 60px 20px; color: #a8b2d8; font-size: 16px; gap: 16px;
   }
   .spinner {
-    width: 44px; height: 44px;
-    border: 4px solid #2d3561;
-    border-top-color: #f093fb;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    width: 44px; height: 44px; border: 4px solid #2d3561;
+    border-top-color: #f093fb; border-radius: 50%; animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Game ── */
-  .game {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px 20px 0;
-    width: 100%;
-    max-width: 1120px;
-  }
-
-  /* score */
-  .score-bar {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
-    font-size: 1.2rem;
-  }
+  .game { display: none; flex-direction: column; align-items: center; padding: 16px 20px 0; width: 100%; max-width: 1120px; }
+  .score-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; font-size: 1.2rem; }
   .stars { display: flex; gap: 3px; font-size: 1.6rem; line-height: 1; }
   .win-msg {
-    display: none;
-    font-size: 1.3rem;
+    display: none; font-size: 1.3rem; font-weight: 700;
     background: linear-gradient(135deg, #f093fb, #4ecdc4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 700;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-
-  /* canvases */
-  .canvases {
-    display: flex;
-    gap: 18px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+  .canvases { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
   .canvas-col { display: flex; flex-direction: column; align-items: center; }
-  .canvas-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #7c8dbf;
-    margin-bottom: 6px;
-  }
+  .canvas-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7c8dbf; margin-bottom: 6px; }
   .canvas-wrap {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    cursor: crosshair;
-    border: 2px solid #2d3561;
-    transition: border-color 0.2s;
+    position: relative; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5); cursor: crosshair;
+    border: 2px solid #2d3561; transition: border-color 0.2s;
   }
   .canvas-wrap:hover { border-color: #f093fb; }
   canvas { display: block; }
-
-  /* miss flash */
   .miss-flash {
-    position: absolute;
-    pointer-events: none;
-    border-radius: 50%;
-    background: rgba(255, 60, 60, 0.45);
-    animation: missAnim 0.45s ease-out forwards;
+    position: absolute; pointer-events: none; border-radius: 50%;
+    background: rgba(255,60,60,0.45); animation: missAnim 0.45s ease-out forwards;
   }
-  @keyframes missAnim {
-    from { transform: scale(0.3); opacity: 1; }
-    to   { transform: scale(2.5); opacity: 0; }
-  }
-
-  .game-hint {
-    margin-top: 12px;
-    color: #7c8dbf;
-    font-size: 12px;
-    letter-spacing: 0.03em;
-  }
-  .game-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-  }
+  @keyframes missAnim { from { transform: scale(0.3); opacity: 1; } to { transform: scale(2.5); opacity: 0; } }
+  .game-hint { margin-top: 12px; color: #7c8dbf; font-size: 12px; text-align: center; max-width: 600px; }
+  .game-actions { display: flex; gap: 10px; margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -210,36 +90,29 @@
   <p class="subtitle">Find all 5 differences between the two pictures!</p>
 </header>
 
-<!-- Setup -->
 <div class="setup" id="setupPanel">
-  <div class="setup-section-label">🎨 Generate an AI image</div>
-  <div class="prompt-row">
-    <input type="text" id="promptInput" value="a sunny farm with a red barn, chickens, flowers, and a rainbow" placeholder="describe a scene…">
-    <button class="btn btn-primary" id="btnGenerate">Generate</button>
+  <div class="setup-label">✨ Generate a cartoon scene</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btnGenerate">🎨 Generate Scene</button>
   </div>
-
-  <div class="divider">— or upload your own —</div>
-
+  <div class="divider">— or use your own photo —</div>
   <label class="upload-label">
-    📁 Choose a photo from your device
+    📁 Upload a photo from your device
     <input type="file" id="fileInput" accept="image/*">
   </label>
 </div>
 
-<!-- Loading -->
 <div class="loading" id="loadingPanel">
   <div class="spinner"></div>
-  <span id="loadingMsg">Generating image…</span>
+  <span id="loadingMsg">Drawing scene…</span>
 </div>
 
-<!-- Game -->
 <div class="game" id="gamePanel">
   <div class="score-bar">
     <div class="stars" id="stars">☆☆☆☆☆</div>
     <span id="scoreText">0 / 5 found</span>
     <span class="win-msg" id="winMsg">🎉 You found them all!</span>
   </div>
-
   <div class="canvases">
     <div class="canvas-col">
       <div class="canvas-label">Original</div>
@@ -250,9 +123,7 @@
       <div class="canvas-wrap" id="wrap2"><canvas id="canvas2"></canvas></div>
     </div>
   </div>
-
-  <p class="game-hint">Click anywhere on either picture where you see a difference</p>
-
+  <p class="game-hint" id="gameHint">Click anywhere on either picture where you see a difference</p>
   <div class="game-actions">
     <button class="btn btn-secondary" id="btnReveal">Reveal all</button>
     <button class="btn btn-secondary" id="btnNewGame">↩ New game</button>
@@ -268,248 +139,403 @@ let audioCtx    = null;
 
 const canvas1 = document.getElementById('canvas1');
 const canvas2 = document.getElementById('canvas2');
-const ctx1    = canvas1.getContext('2d', { willReadFrequently: true });
-const ctx2    = canvas2.getContext('2d', { willReadFrequently: true });
+const ctx1    = canvas1.getContext('2d');
+const ctx2    = canvas2.getContext('2d');
 
-// ── Setup controls ─────────────────────────────────────────────────────────
-document.getElementById('btnGenerate').addEventListener('click', () => {
-  const raw = document.getElementById('promptInput').value.trim();
-  const prompt = raw || 'a colorful garden with butterflies and flowers';
-  generateAI(prompt);
-});
+// ── Controls ───────────────────────────────────────────────────────────────
+document.getElementById('btnGenerate').addEventListener('click', generateScene);
+document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+document.getElementById('btnNewGame').addEventListener('click', resetToSetup);
+document.getElementById('btnReveal').addEventListener('click', revealAll);
+document.getElementById('wrap1').addEventListener('click', e => handleClick(e, canvas1, 'wrap1'));
+document.getElementById('wrap2').addEventListener('click', e => handleClick(e, canvas2, 'wrap2'));
 
-document.getElementById('promptInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('btnGenerate').click();
-});
+// ── Procedural Scene Generation ────────────────────────────────────────────
+function generateScene() {
+  showLoading('Drawing scene…');
+  // Double rAF so the loading spinner actually renders before we block
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const W = Math.min(500, Math.floor((window.innerWidth - 80) / 2));
+    const H = Math.round(W * 0.75);
+    canvas1.width = canvas2.width = W;
+    canvas1.height = canvas2.height = H;
 
-document.getElementById('fileInput').addEventListener('change', e => {
+    const base = makeBaseState(W, H);
+    differences = pickDifferences(base);
+
+    drawScene(ctx1, base);
+    drawScene(ctx2, applyMods(base, differences));
+
+    foundCount = 0;
+    gameActive = true;
+    updateScore();
+    document.getElementById('gameHint').textContent =
+      'Click anywhere on either picture where you see a difference';
+    showGame();
+  }));
+}
+
+// ── Scene State ────────────────────────────────────────────────────────────
+function makeBaseState(W, H) {
+  const gY = Math.round(H * 0.64);
+  return {
+    W, H, gY,
+    sun:   { x: W*0.12, y: H*0.14, r: H*0.076, col: '#ffd700' },
+    clouds: [
+      { x: W*0.33, y: H*0.14, s: 0.9,  on: true },
+      { x: W*0.62, y: H*0.09, s: 0.75, on: true },
+    ],
+    mountains: [
+      { x: W*0.22, h: H*0.28, w: W*0.26, baseY: gY, col: '#7090b8' },
+      { x: W*0.58, h: H*0.23, w: W*0.30, baseY: gY, col: '#5a7aa0' },
+    ],
+    house: {
+      x: W*0.36, y: H*0.36, bw: W*0.26, bh: H*0.295,
+      rCol: '#c0392b', bCol: '#f0e6d3', dCol: '#8b5e3c', chimney: true,
+    },
+    trees: [
+      { x: W*0.14, gY, th: H*0.21, lr: H*0.105, lc: '#2e8b57', tc: '#8b6914' },
+      { x: W*0.81, gY, th: H*0.18, lr: H*0.093, lc: '#2e8b57', tc: '#8b6914' },
+    ],
+    flowers: [
+      { x: W*0.06, y: gY + H*0.12, col: '#e74c3c' },
+      { x: W*0.24, y: gY + H*0.15, col: '#9b59b6' },
+      { x: W*0.66, y: gY + H*0.12, col: '#e74c3c' },
+      { x: W*0.76, y: gY + H*0.15, col: '#f39c12' },
+      { x: W*0.90, y: gY + H*0.12, col: '#3498db' },
+    ],
+    birds: [
+      { x: W*0.43, y: H*0.11, sz: 9, on: true },
+      { x: W*0.52, y: H*0.07, sz: 7, on: true },
+    ],
+  };
+}
+
+// ── Difference Pool ────────────────────────────────────────────────────────
+// Each entry: { hitX, hitY, hitR, apply(state) }  — no visible hint in canvas2
+function buildPool(s) {
+  const { sun, house, trees, flowers, birds, mountains } = s;
+  return [
+    { hitX: sun.x,                        hitY: sun.y,                              hitR: sun.r + 18,
+      apply: st => { st.sun.col = '#ff7400'; } },
+    { hitX: house.x + house.bw*0.5,       hitY: house.y - house.bh*0.35,           hitR: house.bw*0.55,
+      apply: st => { st.house.rCol = '#2980b9'; } },
+    { hitX: house.x + house.bw*0.73,      hitY: house.y - house.bh*0.3,            hitR: 28,
+      apply: st => { st.house.chimney = false; } },
+    { hitX: house.x + house.bw*0.5,       hitY: house.y + house.bh*0.82,           hitR: 28,
+      apply: st => { st.house.dCol = '#2471a3'; } },
+    { hitX: trees[0].x,                   hitY: trees[0].gY - trees[0].th - trees[0].lr*0.75, hitR: trees[0].lr + 10,
+      apply: st => { st.trees[0].lc = '#8e44ad'; } },
+    { hitX: trees[1].x,                   hitY: trees[1].gY - trees[1].th - trees[1].lr*0.75, hitR: trees[1].lr + 10,
+      apply: st => { st.trees[1].lc = '#e67e22'; } },
+    { hitX: s.clouds[0].x,                hitY: s.clouds[0].y,                      hitR: 42,
+      apply: st => { st.clouds[0].on = false; } },
+    { hitX: s.clouds[1].x,                hitY: s.clouds[1].y,                      hitR: 36,
+      apply: st => { st.clouds[1].on = false; } },
+    { hitX: flowers[0].x,                 hitY: flowers[0].y,                       hitR: 24,
+      apply: st => { st.flowers[0].col = '#f1c40f'; } },
+    { hitX: flowers[3].x,                 hitY: flowers[3].y,                       hitR: 24,
+      apply: st => { st.flowers[3].col = '#ff1493'; } },
+    { hitX: birds[0].x,                   hitY: birds[0].y,                         hitR: 26,
+      apply: st => { st.birds[0].on = false; } },
+    { hitX: mountains[0].x,               hitY: mountains[0].baseY - mountains[0].h*0.5, hitR: 55,
+      apply: st => { st.mountains[0].col = '#9b7a5a'; } },
+  ];
+}
+
+function pickDifferences(base) {
+  return shuffle(buildPool(base)).slice(0, 5).map(d => ({ ...d, found: false }));
+}
+
+function applyMods(base, diffs) {
+  const s = JSON.parse(JSON.stringify(base)); // deep clone plain data
+  for (const d of diffs) d.apply(s);
+  return s;
+}
+
+// ── Scene Drawing ──────────────────────────────────────────────────────────
+function drawScene(ctx, s) {
+  const { W, H, gY } = s;
+
+  // Sky
+  const sky = ctx.createLinearGradient(0, 0, 0, gY);
+  sky.addColorStop(0, '#4a9fd4'); sky.addColorStop(1, '#aad4ee');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, gY + 4);
+
+  // Ground
+  const grd = ctx.createLinearGradient(0, gY, 0, H);
+  grd.addColorStop(0, '#5cb85c'); grd.addColorStop(1, '#3a7a3a');
+  ctx.fillStyle = grd; ctx.fillRect(0, gY, W, H - gY);
+
+  // Mountains
+  for (const m of s.mountains) {
+    ctx.fillStyle = m.col;
+    ctx.beginPath();
+    ctx.moveTo(m.x - m.w*0.5, m.baseY);
+    ctx.lineTo(m.x, m.baseY - m.h);
+    ctx.lineTo(m.x + m.w*0.5, m.baseY);
+    ctx.closePath(); ctx.fill();
+    // Snow cap
+    ctx.fillStyle = '#e8f4fb';
+    ctx.beginPath();
+    ctx.moveTo(m.x,              m.baseY - m.h);
+    ctx.lineTo(m.x - m.w*0.14,  m.baseY - m.h + m.h*0.28);
+    ctx.lineTo(m.x + m.w*0.14,  m.baseY - m.h + m.h*0.28);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // Sun
+  const su = s.sun;
+  ctx.save(); ctx.translate(su.x, su.y);
+  ctx.strokeStyle = su.col; ctx.lineWidth = 3;
+  for (let i = 0; i < 8; i++) {
+    ctx.save(); ctx.rotate(i * Math.PI / 4);
+    ctx.beginPath(); ctx.moveTo(su.r + 5, 0); ctx.lineTo(su.r + 16, 0); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(0, 0, su.r, 0, Math.PI*2);
+  ctx.fillStyle = su.col; ctx.fill();
+  // Sun face
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  for (const ex of [-su.r*0.25, su.r*0.25]) {
+    ctx.beginPath(); ctx.arc(ex, -su.r*0.1, su.r*0.1, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(0, su.r*0.15, su.r*0.22, 0, Math.PI); ctx.stroke();
+  ctx.restore();
+
+  // Clouds
+  for (const cl of s.clouds) {
+    if (!cl.on) continue;
+    ctx.save(); ctx.translate(cl.x, cl.y); ctx.scale(cl.s, cl.s);
+    ctx.fillStyle = 'rgba(255,255,255,0.93)';
+    for (const [bx, by, br] of [[0,0,22],[-24,9,17],[24,9,17],[-10,-8,15],[10,-8,15],[0,14,19]]) {
+      ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Birds
+  for (const b of s.birds) {
+    if (!b.on) continue;
+    ctx.strokeStyle = '#334'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(b.x - b.sz, b.y);
+    ctx.quadraticCurveTo(b.x - b.sz*0.5, b.y - b.sz*0.6, b.x, b.y);
+    ctx.quadraticCurveTo(b.x + b.sz*0.5, b.y - b.sz*0.6, b.x + b.sz, b.y);
+    ctx.stroke();
+  }
+
+  // House — chimney drawn first so roof overlaps it
+  const h = s.house;
+  const rH   = h.bh * 0.44;
+  const rBx  = h.x  - h.bw * 0.08;
+  const rBw  = h.bw * 1.16;
+  if (h.chimney) {
+    const cx = h.x + h.bw*0.68, cw = h.bw*0.09;
+    ctx.fillStyle = '#a0522d';
+    ctx.fillRect(cx, h.y - rH*0.55, cw, rH*0.7);
+  }
+  // Roof
+  ctx.fillStyle = h.rCol;
+  ctx.beginPath();
+  ctx.moveTo(rBx, h.y); ctx.lineTo(h.x + h.bw*0.5, h.y - rH); ctx.lineTo(rBx + rBw, h.y);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = shade(h.rCol, -30); ctx.lineWidth = 1.5; ctx.stroke();
+  // Body
+  ctx.fillStyle = h.bCol;
+  ctx.fillRect(h.x, h.y, h.bw, h.bh);
+  ctx.strokeStyle = shade(h.bCol, -20); ctx.lineWidth = 1; ctx.strokeRect(h.x, h.y, h.bw, h.bh);
+  // Door
+  const dw = h.bw*0.22, dh = h.bh*0.42;
+  const dx = h.x + (h.bw - dw)*0.5, dy = h.y + h.bh - dh;
+  ctx.fillStyle = h.dCol;
+  ctx.beginPath();
+  ctx.moveTo(dx, dy + dw*0.5);
+  ctx.lineTo(dx, dy + dh);
+  ctx.lineTo(dx + dw, dy + dh);
+  ctx.lineTo(dx + dw, dy + dw*0.5);
+  ctx.arc(dx + dw*0.5, dy + dw*0.5, dw*0.5, 0, Math.PI, true);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#f0c040';
+  ctx.beginPath(); ctx.arc(dx + dw*0.76, dy + dh*0.56, 2.5, 0, Math.PI*2); ctx.fill();
+  // Windows
+  const wSz = h.bw*0.19, wyY = h.y + h.bh*0.18;
+  for (const wx of [h.x + h.bw*0.1, h.x + h.bw*0.71]) {
+    ctx.fillStyle = '#b8ddf0';
+    ctx.fillRect(wx, wyY, wSz, wSz);
+    ctx.strokeStyle = shade(h.bCol, -20); ctx.lineWidth = 1.5;
+    ctx.strokeRect(wx, wyY, wSz, wSz);
+    ctx.beginPath();
+    ctx.moveTo(wx + wSz*0.5, wyY);   ctx.lineTo(wx + wSz*0.5, wyY + wSz);
+    ctx.moveTo(wx, wyY + wSz*0.5);   ctx.lineTo(wx + wSz, wyY + wSz*0.5);
+    ctx.stroke();
+  }
+
+  // Trees
+  for (const t of s.trees) {
+    const tw = t.lr*0.28;
+    const ly = t.gY - t.th - t.lr*0.75;
+    ctx.fillStyle = t.tc;
+    ctx.fillRect(t.x - tw*0.5, t.gY - t.th, tw, t.th);
+    ctx.fillStyle = t.lc;
+    ctx.beginPath(); ctx.arc(t.x, ly, t.lr, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = shade(t.lc, -22);
+    ctx.beginPath(); ctx.arc(t.x + t.lr*0.2, ly + t.lr*0.22, t.lr*0.56, 0, Math.PI*2); ctx.fill();
+  }
+
+  // Flowers
+  const fR = H * 0.022;
+  for (const f of s.flowers) {
+    ctx.strokeStyle = '#3a8a3a'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.x, f.y + fR*2.2); ctx.stroke();
+    ctx.fillStyle = f.col;
+    for (let i = 0; i < 5; i++) {
+      const a = (i/5) * Math.PI*2;
+      ctx.beginPath();
+      ctx.ellipse(f.x + Math.cos(a)*fR*1.1, f.y + Math.sin(a)*fR*1.1, fR*0.88, fR*0.5, a, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath(); ctx.arc(f.x, f.y, fR*0.58, 0, Math.PI*2); ctx.fill();
+  }
+
+  // Fence
+  const fY = gY + 8;
+  ctx.fillStyle = '#d4b896';
+  for (let fx = 8; fx < W - 8; fx += 22) ctx.fillRect(fx - 3.5, fY, 7, 28);
+  ctx.fillRect(0, fY + 8,  W, 4);
+  ctx.fillRect(0, fY + 18, W, 4);
+}
+
+function shade(hex, amt) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  const r = Math.max(0, Math.min(255, (n >> 16)        + amt));
+  const g = Math.max(0, Math.min(255, ((n >> 8) & 0xff)+ amt));
+  const b = Math.max(0, Math.min(255, (n & 0xff)       + amt));
+  return `rgb(${r},${g},${b})`;
+}
+
+// ── Photo mode ─────────────────────────────────────────────────────────────
+function handleFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   showLoading('Loading image…');
   const reader = new FileReader();
-  reader.onload = ev => loadImg(ev.target.result, false);
-  reader.readAsDataURL(file);
-});
-
-document.getElementById('btnNewGame').addEventListener('click', resetToSetup);
-document.getElementById('btnReveal').addEventListener('click', revealAll);
-
-document.getElementById('wrap1').addEventListener('click', e => handleClick(e, canvas1, 'wrap1'));
-document.getElementById('wrap2').addEventListener('click', e => handleClick(e, canvas2, 'wrap2'));
-
-// ── Image loading ──────────────────────────────────────────────────────────
-function generateAI(prompt) {
-  showLoading('Generating AI image… (may take 10–20 s)');
-  // Pollinations.ai — free, no key required, sends CORS headers
-  const seed = Math.floor(Math.random() * 99999);
-  const url  = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=640&height=480&nologo=true&seed=${seed}`;
-  loadImg(url, true);
-}
-
-function loadImg(src, crossOrigin) {
-  const img = new Image();
-  if (crossOrigin) img.crossOrigin = 'anonymous';
-  img.onload  = () => startGame(img);
-  img.onerror = () => {
-    hideLoading();
-    alert('Could not load the image. Try a different prompt or upload your own photo.');
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload  = () => startPhotoGame(img);
+    img.onerror = () => { hideLoading(); alert('Could not load image.'); };
+    img.src = ev.target.result;
   };
-  img.src = src;
+  reader.readAsDataURL(file);
 }
 
-// ── Game setup ─────────────────────────────────────────────────────────────
-function startGame(img) {
-  // Size canvases to fit side-by-side on screen
-  const maxW = Math.min(480, Math.floor((window.innerWidth - 80) / 2));
-  const maxH = 400;
-  const scale = Math.min(maxW / img.width, maxH / img.height, 1);
-  const w = Math.round(img.width  * scale);
-  const h = Math.round(img.height * scale);
+function startPhotoGame(img) {
+  const maxW  = Math.min(480, Math.floor((window.innerWidth - 80) / 2));
+  const scale = Math.min(maxW / img.width, 400 / img.height, 1);
+  const W = Math.round(img.width * scale), H = Math.round(img.height * scale);
+  canvas1.width = canvas2.width = W;
+  canvas1.height = canvas2.height = H;
+  ctx1.drawImage(img, 0, 0, W, H);
+  ctx2.drawImage(img, 0, 0, W, H);
 
-  canvas1.width  = canvas2.width  = w;
-  canvas1.height = canvas2.height = h;
-
-  ctx1.drawImage(img, 0, 0, w, h);
-  ctx2.drawImage(img, 0, 0, w, h);
-
-  // Generate and apply differences to canvas2
-  differences = placeDifferences(w, h);
-  let pixelOk = true;
-  try {
-    ctx2.getImageData(0, 0, 1, 1); // test for CORS taint
-  } catch(e) {
-    pixelOk = false;
-  }
-  applyDifferences(pixelOk);
-
-  foundCount  = 0;
-  gameActive  = true;
-
-  document.getElementById('winMsg').style.display = 'none';
+  // Add 5 small hidden shapes to canvas2 only (no circular pixel blobs)
+  differences = placePhotoShapes(W, H);
+  foundCount = 0;
+  gameActive = true;
   updateScore();
-
-  document.getElementById('loadingPanel').style.display = 'none';
-  document.getElementById('setupPanel').style.display   = 'none';
-  document.getElementById('gamePanel').style.display    = 'flex';
+  document.getElementById('gameHint').textContent =
+    '5 small shapes have been hidden in the right picture — can you find them all?';
+  showGame();
 }
 
-// ── Place 5 non-overlapping differences ───────────────────────────────────
-function placeDifferences(w, h) {
-  const margin  = 55;
-  const minDist = 95;
-  const types   = shuffle(['add-circle', 'brightness', 'color-swap', 'saturation', 'hue-shift']);
-  const diffs   = [];
+const SHAPE_TYPES  = ['star', 'heart', 'circle', 'diamond', 'triangle'];
+const SHAPE_COLORS = ['#ff4757','#ffa502','#2ed573','#1e90ff','#ff6b81','#eccc68','#a29bfe'];
 
+function placePhotoShapes(W, H) {
+  const types = shuffle([...SHAPE_TYPES]);
+  const diffs = [];
+  const margin = 35, minDist = 80;
   let tries = 0;
-  while (diffs.length < 5 && tries < 1000) {
+  while (diffs.length < 5 && tries < 600) {
     tries++;
-    const x = margin + Math.random() * (w - margin * 2);
-    const y = margin + Math.random() * (h - margin * 2);
-    if (diffs.every(d => Math.hypot(d.x - x, d.y - y) > minDist)) {
-      diffs.push({
-        x: Math.round(x),
-        y: Math.round(y),
-        r: 26 + Math.floor(Math.random() * 14), // 26–40 px
-        type: types[diffs.length],
-        found: false
-      });
+    const x = margin + Math.random() * (W - margin*2);
+    const y = margin + Math.random() * (H - margin*2);
+    if (diffs.every(d => Math.hypot(d.hitX - x, d.hitY - y) > minDist)) {
+      const r   = 13 + Math.floor(Math.random() * 8);
+      const col = SHAPE_COLORS[Math.floor(Math.random() * SHAPE_COLORS.length)];
+      drawShape(ctx2, types[diffs.length], x, y, r, col);
+      diffs.push({ hitX: x, hitY: y, hitR: r + 18, found: false });
     }
   }
   return diffs;
 }
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-// ── Apply differences to canvas2 ──────────────────────────────────────────
-function applyDifferences(pixelOk) {
-  for (const d of differences) {
-    if (!pixelOk && d.type !== 'add-circle') {
-      d.type = 'add-circle'; // safe fallback when canvas is CORS-tainted
+function drawShape(ctx, type, x, y, r, col) {
+  ctx.save();
+  ctx.fillStyle = col;
+  ctx.shadowColor = 'rgba(0,0,0,0.55)';
+  ctx.shadowBlur  = 4;
+  ctx.beginPath();
+  if (type === 'circle') {
+    ctx.arc(x, y, r*0.72, 0, Math.PI*2);
+  } else if (type === 'star') {
+    for (let i = 0; i < 5; i++) {
+      const oa = (i*2/5 - 0.5)*Math.PI, ia = ((i+0.5)*2/5 - 0.5)*Math.PI;
+      const cmd = i === 0 ? 'moveTo' : 'lineTo';
+      ctx[cmd](x + Math.cos(oa)*r, y + Math.sin(oa)*r);
+      ctx.lineTo(x + Math.cos(ia)*r*0.42, y + Math.sin(ia)*r*0.42);
     }
-    applyOne(d);
+    ctx.closePath();
+  } else if (type === 'heart') {
+    const s = r*0.55;
+    ctx.moveTo(x, y + s*0.4);
+    ctx.bezierCurveTo(x,       y - s*0.6, x + s*1.4, y - s*0.6, x + s*1.4, y + s*0.4);
+    ctx.bezierCurveTo(x + s*1.4, y + s*1.2, x, y + s*2.1, x, y + s*2.1);
+    ctx.bezierCurveTo(x,       y + s*2.1, x - s*1.4, y + s*1.2, x - s*1.4, y + s*0.4);
+    ctx.bezierCurveTo(x - s*1.4, y - s*0.6, x, y - s*0.6, x, y + s*0.4);
+    ctx.closePath();
+  } else if (type === 'diamond') {
+    ctx.moveTo(x,        y - r);
+    ctx.lineTo(x + r*0.7, y);
+    ctx.lineTo(x,        y + r);
+    ctx.lineTo(x - r*0.7, y);
+    ctx.closePath();
+  } else if (type === 'triangle') {
+    ctx.moveTo(x,          y - r);
+    ctx.lineTo(x + r*0.87, y + r*0.5);
+    ctx.lineTo(x - r*0.87, y + r*0.5);
+    ctx.closePath();
   }
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.restore();
 }
 
-const BRIGHT_COLORS = ['#ff4757','#ffa502','#2ed573','#1e90ff','#ff6b81','#eccc68','#a29bfe','#ff6348'];
-
-function applyOne(d) {
-  const { x, y, r, type } = d;
-
-  if (type === 'add-circle') {
-    // Simply paint a vivid circle only on canvas2
-    ctx2.save();
-    ctx2.beginPath();
-    ctx2.arc(x, y, r * 0.55, 0, Math.PI * 2);
-    ctx2.fillStyle = BRIGHT_COLORS[Math.floor(Math.random() * BRIGHT_COLORS.length)];
-    ctx2.fill();
-    ctx2.restore();
-    return;
-  }
-
-  // Pixel-level manipulations inside a circular mask
-  const x0 = Math.max(0, x - r);
-  const y0 = Math.max(0, y - r);
-  const x1 = Math.min(canvas2.width,  x + r);
-  const y1 = Math.min(canvas2.height, y + r);
-  const rw = x1 - x0, rh = y1 - y0;
-  if (rw <= 0 || rh <= 0) return;
-
-  let imgData;
-  try { imgData = ctx2.getImageData(x0, y0, rw, rh); }
-  catch(e) { return; }
-  const px = imgData.data;
-
-  for (let row = 0; row < rh; row++) {
-    for (let col = 0; col < rw; col++) {
-      const dx = (x0 + col) - x;
-      const dy = (y0 + row) - y;
-      if (dx * dx + dy * dy > r * r) continue;
-      const i = (row * rw + col) * 4;
-
-      if      (type === 'brightness') { px[i]=clamp(px[i]+70); px[i+1]=clamp(px[i+1]+70); px[i+2]=clamp(px[i+2]+70); }
-      else if (type === 'color-swap') { const t=px[i]; px[i]=px[i+2]; px[i+2]=t; }
-      else if (type === 'saturation') { const g=(px[i]*.299+px[i+1]*.587+px[i+2]*.114)|0; px[i]=px[i+1]=px[i+2]=g; }
-      else if (type === 'hue-shift') {
-        const [h,s,l] = rgbToHsl(px[i],px[i+1],px[i+2]);
-        const [r2,g2,b2] = hslToRgb((h+0.33)%1, s, l);
-        px[i]=r2; px[i+1]=g2; px[i+2]=b2;
-      }
-    }
-  }
-  ctx2.putImageData(imgData, x0, y0);
-}
-
-function clamp(v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
-
-function rgbToHsl(r, g, b) {
-  r/=255; g/=255; b/=255;
-  const max=Math.max(r,g,b), min=Math.min(r,g,b);
-  const l=(max+min)/2;
-  if (max===min) return [0,0,l];
-  const d=max-min, s=l>0.5?d/(2-max-min):d/(max+min);
-  let h;
-  if      (max===r) h=((g-b)/d+(g<b?6:0))/6;
-  else if (max===g) h=((b-r)/d+2)/6;
-  else              h=((r-g)/d+4)/6;
-  return [h,s,l];
-}
-
-function hslToRgb(h, s, l) {
-  if (s===0) { const v=Math.round(l*255); return [v,v,v]; }
-  const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
-  const hue2rgb=(p,q,t)=>{
-    if(t<0)t+=1; if(t>1)t-=1;
-    if(t<1/6)return p+(q-p)*6*t;
-    if(t<1/2)return q;
-    if(t<2/3)return p+(q-p)*(2/3-t)*6;
-    return p;
-  };
-  return [Math.round(hue2rgb(p,q,h+1/3)*255),
-          Math.round(hue2rgb(p,q,h    )*255),
-          Math.round(hue2rgb(p,q,h-1/3)*255)];
-}
-
-// ── Click detection ────────────────────────────────────────────────────────
+// ── Click Detection ────────────────────────────────────────────────────────
 function handleClick(e, canvas, wrapId) {
   if (!gameActive) return;
-  const rect   = canvas.getBoundingClientRect();
-  const scaleX = canvas.width  / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const cx     = (e.clientX - rect.left) * scaleX;
-  const cy     = (e.clientY - rect.top)  * scaleY;
-
-  const hitR = 50; // generous for children
-  const hit  = differences.find(d => !d.found && Math.hypot(d.x - cx, d.y - cy) <= hitR);
-
+  const rect = canvas.getBoundingClientRect();
+  const cx = (e.clientX - rect.left) * (canvas.width  / rect.width);
+  const cy = (e.clientY - rect.top)  * (canvas.height / rect.height);
+  const hit = differences.find(d => !d.found && Math.hypot(d.hitX - cx, d.hitY - cy) <= Math.max(d.hitR, 50));
   if (hit) {
-    hit.found = true;
-    foundCount++;
-    tone(true);
-    markFound(hit);
-    updateScore();
+    hit.found = true; foundCount++;
+    tone(true); markFound(hit); updateScore();
     if (foundCount === 5) setTimeout(winGame, 500);
   } else {
-    tone(false);
-    spawnMiss(e, wrapId);
+    tone(false); spawnMiss(e, wrapId);
   }
 }
 
 function markFound(d) {
   for (const ctx of [ctx1, ctx2]) {
     ctx.save();
-    ctx.beginPath();
-    ctx.arc(d.x, d.y, d.r + 10, 0, Math.PI * 2);
-    ctx.strokeStyle = '#2ed573';
-    ctx.lineWidth   = 3.5;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(46,213,115,0.18)';
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(d.hitX, d.hitY, d.hitR, 0, Math.PI*2);
+    ctx.strokeStyle = '#2ed573'; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.fillStyle = 'rgba(46,213,115,0.15)'; ctx.fill();
     ctx.restore();
   }
 }
@@ -517,43 +543,46 @@ function markFound(d) {
 function spawnMiss(e, wrapId) {
   const wrap = document.getElementById(wrapId);
   const rect = wrap.getBoundingClientRect();
-  const el   = document.createElement('div');
+  const el = document.createElement('div');
   el.className = 'miss-flash';
   const sz = 44;
-  el.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-rect.left-sz/2}px;top:${e.clientY-rect.top-sz/2}px;`;
-  wrap.appendChild(el);
-  el.addEventListener('animationend', () => el.remove());
+  el.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX - rect.left - sz*0.5}px;top:${e.clientY - rect.top - sz*0.5}px;`;
+  wrap.appendChild(el); el.addEventListener('animationend', () => el.remove());
 }
 
-// ── Score ──────────────────────────────────────────────────────────────────
+// ── Score & Win ────────────────────────────────────────────────────────────
 function updateScore() {
   document.getElementById('scoreText').textContent = `${foundCount} / 5 found`;
   document.getElementById('stars').textContent = '⭐'.repeat(foundCount) + '☆'.repeat(5 - foundCount);
 }
 
-// ── Win ────────────────────────────────────────────────────────────────────
 function winGame() {
   gameActive = false;
-  document.getElementById('winMsg').style.display = 'inline';
+  document.getElementById('winMsg').style.display    = 'inline';
   document.getElementById('scoreText').style.display = 'none';
-  tone(true); tone(true);
 }
 
 function revealAll() {
-  for (const d of differences) {
-    if (!d.found) { d.found = true; foundCount++; markFound(d); }
-  }
+  differences.filter(d => !d.found).forEach(d => { d.found = true; foundCount++; markFound(d); });
   gameActive = false;
   updateScore();
-  document.getElementById('winMsg').style.display = 'inline';
+  document.getElementById('winMsg').style.display    = 'inline';
   document.getElementById('scoreText').style.display = 'none';
 }
 
-// ── UI helpers ─────────────────────────────────────────────────────────────
+// ── Utilities ──────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 function showLoading(msg) {
   document.getElementById('loadingMsg').textContent = msg;
-  document.getElementById('setupPanel').style.display  = 'none';
-  document.getElementById('gamePanel').style.display   = 'none';
+  document.getElementById('setupPanel').style.display   = 'none';
+  document.getElementById('gamePanel').style.display    = 'none';
   document.getElementById('loadingPanel').style.display = 'flex';
 }
 
@@ -562,12 +591,18 @@ function hideLoading() {
   document.getElementById('setupPanel').style.display   = 'block';
 }
 
+function showGame() {
+  document.getElementById('loadingPanel').style.display = 'none';
+  document.getElementById('setupPanel').style.display   = 'none';
+  document.getElementById('gamePanel').style.display    = 'flex';
+}
+
 function resetToSetup() {
   gameActive = false;
-  document.getElementById('gamePanel').style.display  = 'none';
-  document.getElementById('setupPanel').style.display = 'block';
-  document.getElementById('scoreText').style.display  = 'inline';
-  document.getElementById('winMsg').style.display     = 'none';
+  document.getElementById('gamePanel').style.display    = 'none';
+  document.getElementById('setupPanel').style.display   = 'block';
+  document.getElementById('scoreText').style.display    = 'inline';
+  document.getElementById('winMsg').style.display       = 'none';
   document.getElementById('fileInput').value = '';
 }
 
@@ -575,26 +610,24 @@ function resetToSetup() {
 function tone(success) {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const t = audioCtx.currentTime;
     if (success) {
-      osc.frequency.setValueAtTime(523, now);       // C5
-      osc.frequency.setValueAtTime(659, now + 0.1); // E5
-      osc.frequency.setValueAtTime(784, now + 0.2); // G5
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-      osc.start(now); osc.stop(now + 0.45);
+      osc.frequency.setValueAtTime(523, t);
+      osc.frequency.setValueAtTime(659, t + 0.1);
+      osc.frequency.setValueAtTime(784, t + 0.2);
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      osc.start(t); osc.stop(t + 0.45);
     } else {
-      osc.frequency.setValueAtTime(220, now);
-      osc.frequency.setValueAtTime(180, now + 0.1);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      osc.start(now); osc.stop(now + 0.25);
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.setValueAtTime(180, t + 0.1);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.start(t); osc.stop(t + 0.25);
     }
-  } catch(e) { /* audio not available */ }
+  } catch(e) {}
 }
 </script>
 </body>
